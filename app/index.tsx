@@ -23,8 +23,9 @@ export default function Index() {
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Home</Text>
-      <Text style={{ marginBottom: 12 }}>Lowongan terbaru:</Text>
+      <Text style={{ fontSize: 18, fontWeight: "bold" }}>Selamat datang !!!</Text>
+      <Text style={{ fontSize: 18, marginBottom: 0, fontWeight: "medium" }}>Muhammad Abyan Aditya</Text>
+      <Text style={{ fontSize: 18, marginTop: 29, fontWeight: "bold" }}>Kategori</Text>
       {loading ? (
         <Text>Loading…</Text>
       ) : (
@@ -32,7 +33,7 @@ export default function Index() {
           data={jobs}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={{ marginBottom: 12 }}>
+            <View style={{ marginBottom: 16 }}>
               <Text style={{ fontSize: 18 }}>{item.title}</Text>
               <Text style={{ color: "#666" }}>{item.location}</Text>
             </View>
