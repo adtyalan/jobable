@@ -5,6 +5,7 @@ export default function RootLayout() {
     <Tabs>
       <Tabs.Screen name="index" options={{ title: "Home" }} />
       <Tabs.Screen name="applications" options={{ title: "Applications" }} />
+      <Tabs.Screen name="comunity" options={{title: "Komunitas"}}/>
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
     </Tabs>
   );
