@@ -1,8 +1,20 @@
-import { Text, View } from "react-native";
+import React from "react";
+import { SafeAreaView, StyleSheet, Text } from "react-native";
+
 export default function Profile() {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Profile Tab</Text>
-    </View>
+    <SafeAreaView style={styles.mainContainer}>
+      <Text>Hallo semua</Text>
+    </SafeAreaView>
   );
+
+
 }
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex:1,
+    backgroundColor: "#FBFFE4",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
