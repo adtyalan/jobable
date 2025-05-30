@@ -25,7 +25,8 @@ export default function Index() {
     <View style={{ flex: 1, padding: 16 }}>
       <Text style={{ fontSize: 18, fontWeight: "bold" }}>Selamat datang !!!</Text>
       <Text style={{ fontSize: 18, marginBottom: 0, fontWeight: "medium" }}>Muhammad Abyan Aditya</Text>
-      <Text style={{ fontSize: 18, marginTop: 29, fontWeight: "bold" }}>Kategori</Text>
+      <Text style={{ fontSize: 18, marginTop: 29, marginBottom: 58, fontWeight: "bold" }}>Kategori</Text>
+      <Text style={{ fontSize: 18, fontWeight: "bold" }}>Rekomendasi</Text>
       {loading ? (
         <Text>Loading…</Text>
       ) : (
