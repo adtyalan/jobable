@@ -8,92 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-
-const categories = ["Tunarungu", "Tunanetra", "Tunawicara", "Tunadaksa"];
-
-const dummyData = {
-  Tunarungu: [
-    {
-      id: 1,
-      title: "WebDev",
-      company: "PT Telkom Indonesia",
-      type: "Full-time, onsite",
-      location: "Surabaya, Jawa Timur",
-      salary: "4.000.000",
-      disability_category: "Tunarungu, Tunawicara",
-    },
-    {
-      id: 2,
-      title: "Content Writer",
-      company: "PT Media Kreatif",
-      type: "Full-time, onsite",
-      location: "Bandung, Jawa Barat",
-      salary: "3.500.000",
-      disability_category: "Tunarungu",
-    },
-  ],
-  Tunanetra: [
-    {
-      id: 3,
-      title: "Call Center",
-      company: "PT Komunikasi Mandiri",
-      type: "Full-time, onsite",
-      location: "Jakarta Selatan",
-      salary: "4.200.000",
-      disability_category: "Tunanetra",
-    },
-    {
-      id: 4,
-      title: "Data Entry",
-      company: "PT Data Nusantara",
-      type: "Full-time, onsite",
-      location: "Semarang, Jawa Tengah",
-      salary: "3.800.000",
-      disability_category: "Tunanetra",
-    },
-  ],
-  Tunawicara: [
-    {
-      id: 5,
-      title: "Desainer Grafis",
-      company: "PT Desain Visual",
-      type: "Full-time, onsite",
-      location: "Yogyakarta",
-      salary: "4.500.000",
-      disability_category: "Tunawicara",
-    },
-    {
-      id: 6,
-      title: "Editor Video",
-      company: "PT Kreatif Media",
-      type: "Full-time, onsite",
-      location: "Surabaya",
-      salary: "4.000.000",
-      disability_category: "Tunawicara",
-    },
-  ],
-  Tunadaksa: [
-    {
-      id: 7,
-      title: "Admin Sosial Media",
-      company: "PT Digital Solusi",
-      type: "Full-time, onsite",
-      location: "Bandung",
-      salary: "3.700.000",
-      disability_category: "Tunadaksa",
-    },
-    {
-      id: 8,
-      title: "QA Tester",
-      company: "PT Software Global",
-      type: "Full-time, onsite",
-      location: "Jakarta",
-      salary: "4.300.000",
-      disability_category: "Tunadaksa",
-    },
-  ],
-};
+import { SafeAreaView } from "react-native-safe-area-context";
+import "react-native-url-polyfill/auto";
+import { supabase } from "../../utils/supabase";
 
 // Import ikon
 import jobCompanyIcon from "../assets/images/job-category-icon.svg";
@@ -101,7 +18,10 @@ import jobCategoryIcon from "../assets/images/job-company-icon.svg";
 import jobTypeIcon from "../assets/images/job-type-icon.svg";
 import moneyIcon from "../assets/images/money-icon.svg";
 
-export default function Index() {
+// Kategori
+const categories = ["Tunarungu", "Tunanetra", "Tunawicara", "Tunadaksa"];
+
+const Index = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Tunarungu");
@@ -110,18 +30,28 @@ export default function Index() {
     fetchJobs();
   }, [selectedCategory]);
 
-  async function fetchJobs() {
+  const fetchJobs = async () => {
     setLoading(true);
-    const data = dummyData[selectedCategory] || [];
-
-    setTimeout(() => {
-      setJobs(data);
+    try {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .ilike("disability_category", `%${selectedCategory}%`);
+      if (error) {
+        console.warn("Supabase error:", error.message);
+        setJobs([]);
+      } else {
+        setJobs(data || []);
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
       setLoading(false);
-    }, 500);
-  }
+    }
+  };
 
   return (
-    <View style={{ flex: 1, padding: 16, backgroundColor: "#FBFFE4" }}>
+    <SafeAreaView style={{ flex: 1, padding: 16, backgroundColor: "#FBFFE4" }}>
       <Text style={styles.heading}>Selamat pagi !</Text>
       <Text style={styles.subheading}>Muhammad Abyan Aditya</Text>
 
@@ -156,6 +86,7 @@ export default function Index() {
       </ScrollView>
 
       <Text style={styles.rekomendasiTitle}>Rekomendasi</Text>
+
       {loading ? (
         <Text>Loading…</Text>
       ) : (
@@ -189,7 +120,9 @@ export default function Index() {
 
               <View style={styles.row}>
                 <Image source={jobCategoryIcon} style={styles.icon} />
-                <Text style={styles.jobCategory}>{item.disability_category}</Text>
+                <Text style={styles.jobCategory}>
+                  {item.disability_category}
+                </Text>
               </View>
 
               <Text style={styles.jobUrgent}>Dibutuhkan Segera</Text>
@@ -197,16 +130,17 @@ export default function Index() {
           )}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
-}
+};
+
+export default Index;
 
 const styles = StyleSheet.create({
   heading: {
     fontSize: 18,
     fontWeight: "bold",
   },
-
   subheading: {
     fontSize: 18,
     fontWeight: "500",
@@ -224,7 +158,6 @@ const styles = StyleSheet.create({
     marginTop: 18,
     marginBottom: 10,
   },
-
   categoryButton: {
     width: 100,
     height: 32,
@@ -236,20 +169,16 @@ const styles = StyleSheet.create({
     marginRight: 10,
     backgroundColor: "#fff",
   },
-
   categoryButtonSelected: {
     backgroundColor: "#10B981",
   },
-
   categoryText: {
     fontSize: 14,
     color: "#10B981",
   },
-
   categoryTextSelected: {
     color: "#FBFFE4",
   },
-
   jobCard: {
     padding: 12,
     backgroundColor: "#14B8A6",
@@ -257,7 +186,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     width: "48%",
   },
-
   jobTitle: {
     fontSize: 15,
     fontWeight: "bold",
