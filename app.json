@@ -1,14 +1,11 @@
 {
   "expo": {
-    "assetBundlePatterns": [
-      "assets/images/*"
-    ],
-    "name": "job-able",
+    "name": "Job.able",
     "slug": "job-able",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "jobable",
+    "scheme": "job-able",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -19,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.adtyalan.jobable"
     },
     "web": {
       "bundler": "metro",
@@ -34,12 +32,23 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4359c451-5b04-4b40-ae36-c9a44bae033b"
+      }
     }
   }
 }

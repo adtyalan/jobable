@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
-import { supabase } from "../utils/supabase";
+import { SafeAreaView } from "react-native-safe-area-context";
+import "react-native-url-polyfill/auto";
+import { supabase } from "../../utils/supabase";
 
 export default function Index() {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -12,7 +14,7 @@ export default function Index() {
 
   async function fetchJobs() {
     setLoading(true);
-    const { data, error } = await supabase.from("jobs").select("*").limit(5);
+    const { data, error } = await supabase.from("jobs").select("*");
     if (error) {
       console.error(error);
     } else {
@@ -22,10 +24,16 @@ export default function Index() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <Text style={{ fontSize: 18, fontWeight: "bold" }}>Selamat datang !!!</Text>
-      <Text style={{ fontSize: 18, marginBottom: 0, fontWeight: "medium" }}>Muhammad Abyan Aditya</Text>
-      <Text style={{ fontSize: 18, marginTop: 29, fontWeight: "bold" }}>Kategori</Text>
+    <SafeAreaView style={{ flex: 1, padding: 16 }}>
+      <Text
+        style={{
+          fontFamily: "Inter_700Bold",
+          fontSize: 24,
+        }}
+      >
+        Home
+      </Text>
+      <Text style={{ marginBottom: 12 }}>Lowongan terbaru:</Text>
       {loading ? (
         <Text>Loading…</Text>
       ) : (
@@ -40,6 +48,6 @@ export default function Index() {
           )}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }

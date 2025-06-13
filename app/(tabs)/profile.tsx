@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { supabase } from '../utils/supabase';
+import { router } from "expo-router";
+import { useState } from "react";
+import { Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSupabaseUser } from "../../hooks/useSupabaseUser";
+import { supabase } from "../../utils/supabase";
 
 const categories = ["Tentang", "Pengalaman", "Pendidikan", "Keahlian"];
 const accessibilityList = [
@@ -9,109 +11,95 @@ const accessibilityList = [
   "Memerlukan pendamping saat orientasi pertama di kantor."
 ];
 
-export default function Profile() {
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function ApplicationsPage() {
+  const user = useSupabaseUser();
   const [selectedCategory, setSelectedCategory] = useState("Tentang");
 
-  useEffect(() => {
-    fetchJobs();
-  }, [selectedCategory]);
-
-  async function fetchJobs() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("jobs")
-      .select("*")
-      .ilike("disability_category", "%${selectedCategory}%") // Sesuaikan nama kolom jika beda
-      .limit(5);
-
-    if (error) {
-      console.error(error);
-    } else {
-      setJobs(data);
-    }
-    setLoading(false);
+  if (!user) {
+    return (
+      <View style={{ padding: 20 }}>
+        <Text>Silakan login untuk melihat aplikasi kamu.</Text>
+        <Button title="Login" onPress={() => router.push("/login")} />
+      </View>
+    );
   }
 
   return (
+    <>
     <SafeAreaView style={styles.mainContainer}>
-      <TouchableOpacity style={styles.profileCircle}>
-        <View style={styles.difableContainer}>
-          <Text style={styles.difableText}>Tunanetra</Text>
-            </View>
-      </TouchableOpacity>
-      
-      <Text style={styles.nameText }>Muhammad Abyan Aditya</Text>
-      <View style={styles.containerNameFollow}>
-        <Text style={styles.followText}>259{"\u2028"}koneksi</Text>
-        <Text style={styles.rotatedline}/>
-        <Text style={styles.followText}>469{"\u2028"}pengikut</Text>
-      </View>
-
-      <Text style={styles.progressHeading}>Pantau Lamaran</Text>
-      <TouchableOpacity style={styles.progressButton}>
-        <View style={styles.leftGroup}>
-          <View style={styles.progressCircle} />
-          <View style={styles.progressTextGroup}>
-            <Text style={styles.progressJobText}>Web Developer</Text>
-            <Text style={styles.progressText}>Review CV</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{marginBottom:16}}
-      >
-        {categories.map((item) => (
-          <TouchableOpacity
-            key={item}
-            onPress={() => setSelectedCategory(item)}
-            style={[
-              styles.categoryButton,
-              selectedCategory === item && styles.categoryButtonSelected,
-            ]}
-          >
-            <Text
-              style={[
-                styles.categoryText,
-                selectedCategory === item && styles.categoryTextSelected,
-              ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {item}
-            </Text>
+          <TouchableOpacity style={styles.profileCircle}>
+            <View style={styles.difableContainer}>
+              <Text style={styles.difableText}>Tunanetra</Text>
+                </View>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <View style={styles.containerContent}>
-        <Text style={styles.headingContent}>Aksesibilitas</Text>
-        {accessibilityList.map((item, index) => (
-          <View key={index} style={styles.listItem}>
-            <Text style={styles.bullet}>{'\u2022'}</Text>
-            <Text style={styles.listItemText}>{item}</Text>
+          
+          <Text style={styles.nameText }>Muhammad Abyan Aditya</Text>
+          <View style={styles.containerNameFollow}>
+            <Text style={styles.followText}>259{"\u2028"}koneksi</Text>
+            <Text style={styles.rotatedline}/>
+            <Text style={styles.followText}>469{"\u2028"}pengikut</Text>
           </View>
-        ))}
-      </View>
-
-      {/* <ScrollView
-        showsVerticalScrollIndicator= {false}>
-
-
-      </ScrollView> */}
-      
-
-      {/* <Image
-        source={require('../assets/images/edit-latar-profile.png')}
-        style={styles.avatar}
-        contentFit="cover"            // opsi: cover, contain, etc.
-        transition={300}              // (opsional) fade-in
-      /> */}
-    </SafeAreaView>
+    
+          <Text style={styles.progressHeading}>Pantau Lamaran</Text>
+          <TouchableOpacity style={styles.progressButton}>
+            <View style={styles.leftGroup}>
+              <View style={styles.progressCircle} />
+              <View style={styles.progressTextGroup}>
+                <Text style={styles.progressJobText}>Web Developer</Text>
+                <Text style={styles.progressText}>Review CV</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+    
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{marginBottom:16}}
+          >
+            {categories.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setSelectedCategory(item)}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === item && styles.categoryButtonSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategory === item && styles.categoryTextSelected,
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+    
+          <View style={styles.containerContent}>
+            <Text style={styles.headingContent}>Aksesibilitas</Text>
+            {accessibilityList.map((item, index) => (
+              <View key={index} style={styles.listItem}>
+                <Text style={styles.bullet}>{'\u2022'}</Text>
+                <Text style={styles.listItemText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        </SafeAreaView>
+    <View style={{ padding: 20 }}>
+      <Text>Halo {user.email}, ini daftar aplikasimu 🎉</Text>
+      <Button
+        title="Logout"
+        onPress={async () => {
+          await supabase.auth.signOut();
+          router.replace("/"); // balik ke home
+        }}
+      />
+    </View>
+    </>
   );
 }
 
