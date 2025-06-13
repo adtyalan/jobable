@@ -41,7 +41,7 @@ export default function Index() {
           data={jobs}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={{ marginBottom: 12 }}>
+            <View style={{ marginBottom: 16 }}>
               <Text style={{ fontSize: 18 }}>{item.title}</Text>
               <Text style={{ color: "#666" }}>{item.location}</Text>
             </View>
