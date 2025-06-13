@@ -1,5 +1,8 @@
 {
   "expo": {
+    "assetBundlePatterns": [
+      "assets/images/*"
+    ],
     "name": "job-able",
     "slug": "job-able",
     "version": "1.0.0",
