@@ -1,12 +1,16 @@
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../utils/supabase"; // pastikan path ini sesuai
 
 type Post = {
@@ -14,7 +18,7 @@ type Post = {
   title: string;
   content: string;
   created_at: string;
-  forum_posts_user_id_fkey?: {
+  users: {
     full_name: string;
   };
   forum_likes: { id: string }[]; // Untuk hitung jumlah like
@@ -36,7 +40,7 @@ export default function Comunity() {
       .select(
         `
     id, title, content, created_at,
-    forum_posts_user_id_fkey(full_name),
+    users(full_name),
     forum_likes(id),
     forum_comments(id),
     forum_saves(id)
@@ -47,7 +51,6 @@ export default function Comunity() {
     if (error) {
       console.error("Error fetching posts:", error.message);
     } else {
-      console.log("DATA FORUM POSTS:", data); // Tambahkan ini
       setPosts(data);
     }
     setLoading(false);
@@ -63,27 +66,44 @@ export default function Comunity() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.postCard}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.author}>
-              oleh {item.forum_posts_user_id_fkey?.full_name || "Anonim"}
-            </Text>
-            <Text>{item.content}</Text>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, paddingVertical: 16 }}>
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.postCard}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.author}>
+                oleh {item.users.full_name || "Anonim"}
+              </Text>
+              <Text>{item.content}</Text>
 
-            <View style={styles.metaBar}>
-              <Text>❤️ {item.forum_likes?.length || 0}</Text>
-              <Text>💬 {item.forum_comments?.length || 0}</Text>
-              <Text>🔖 {item.forum_saves?.length || 0}</Text>
+              <View style={styles.metaBar}>
+                <View style={styles.likeCommentBar}>
+                  <View style={styles.iconContainer}>
+                    <AntDesign name="like2" size={24} color="black" />
+                    <Text>{item.forum_likes?.length || 0}</Text>
+                  </View>
+                  <View style={styles.iconContainer}>
+                    <MaterialCommunityIcons
+                      name="comment-outline"
+                      size={24}
+                      color="black"
+                    />
+                    <Text>{item.forum_comments?.length || 0}</Text>
+                  </View>
+                </View>
+                <View style={styles.iconContainer}>
+                  <Ionicons name="archive-outline" size={24} color="black" />
+                  <Text>{item.forum_saves?.length || 0}</Text>
+                </View>
+              </View>
             </View>
-          </View>
-        )}
-      />
-    </SafeAreaView>
+          )}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -94,12 +114,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   postCard: {
-    marginHorizontal: 16,
+    marginHorizontal: Platform.OS === "web" ? 30 : 30,
     marginVertical: 8,
     padding: 16,
     backgroundColor: "#f4f4f4",
     borderRadius: 12,
-    elevation: 2,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: "#00A991",
   },
   title: {
     fontSize: 18,
@@ -117,5 +139,17 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: "#ddd",
+  },
+  iconContainer: {
+    alignItems: "center",
+    paddingTop: 10,
+    flexDirection: "row",
+    gap: 4,
+  },
+  likeCommentBar: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    flex: 1,
+    gap: 20,
   },
 });
