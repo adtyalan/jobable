@@ -20,6 +20,7 @@
     "@supabase/supabase-js": "^2.49.8",
     "dotenv": "^16.5.0",
     "expo": "53.0.11",
+    "expo-asset": "~11.1.5",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.6",
     "expo-dev-client": "~5.2.0",
@@ -34,16 +35,17 @@
     "expo-system-ui": "~5.0.8",
     "expo-web-browser": "~14.1.6",
     "react": "19.0.0",
+    "react-async-hook": "^4.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.3",
+    "react-native-country-picker-modal": "^2.0.0",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.20.0",
-    "react-native-webview": "13.13.5",
-    "expo-asset": "~11.1.5"
+    "react-native-webview": "13.13.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

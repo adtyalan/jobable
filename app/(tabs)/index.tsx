@@ -1,24 +1,19 @@
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "react-native-url-polyfill/auto";
 import { supabase } from "../../utils/supabase";
 
-// Import ikon
-import jobCompanyIcon from "../assets/images/job-category-icon.svg";
-import jobCategoryIcon from "../assets/images/job-company-icon.svg";
-import jobTypeIcon from "../assets/images/job-type-icon.svg";
-import moneyIcon from "../assets/images/money-icon.svg";
-
-// Kategori
 const categories = ["Tunarungu", "Tunanetra", "Tunawicara", "Tunadaksa"];
 
 const Index = () => {
@@ -28,62 +23,55 @@ const Index = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedCategory]);
+  }, []);
 
-  const fetchJobs = async () => {
+  async function fetchJobs() {
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("jobs")
-        .select("*")
-        .ilike("disability_category", `%${selectedCategory}%`);
-      if (error) {
-        console.warn("Supabase error:", error.message);
-        setJobs([]);
-      } else {
-        setJobs(data || []);
-      }
-    } catch (err) {
-      console.error("Fetch error:", err);
-    } finally {
-      setLoading(false);
+    const { data, error } = await supabase.from("jobs").select(
+    '*');
+    if (error) {
+      console.error(error);
+    } else {
+      setJobs(data);
     }
-  };
+    setLoading(false);
+  }
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16, backgroundColor: "#FBFFE4" }}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Selamat pagi !</Text>
       <Text style={styles.subheading}>Muhammad Abyan Aditya</Text>
 
       <Text style={styles.kategoriTitle}>Kategori</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ maxHeight: 40, marginBottom: 10 }}
-        contentContainerStyle={{ alignItems: "center" }}
-      >
-        {categories.map((item) => (
-          <TouchableOpacity
-            key={item}
-            onPress={() => setSelectedCategory(item)}
-            style={[
-              styles.categoryButton,
-              selectedCategory === item && styles.categoryButtonSelected,
-            ]}
-          >
-            <Text
+      <View style={styles.categoryWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryScrollContent}
+        >
+          {categories.map((item) => (
+            <TouchableOpacity
+              key={item}
+              onPress={() => setSelectedCategory(item)}
               style={[
-                styles.categoryText,
-                selectedCategory === item && styles.categoryTextSelected,
+                styles.categoryButton,
+                selectedCategory === item && styles.categoryButtonSelected,
               ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
             >
-              {item}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === item && styles.categoryTextSelected,
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       <Text style={styles.rekomendasiTitle}>Rekomendasi</Text>
 
@@ -96,12 +84,22 @@ const Index = () => {
           numColumns={2}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           renderItem={({ item }) => (
-            <View style={styles.jobCard}>
+            <>
+            <Pressable style={styles.jobCard} onPress={() => router.push('/jobs')}>
               <Text style={styles.jobTitle}>{item.title}</Text>
 
+              {item.companies?.logo && (
+                <View style={styles.row}>
+                  <Image
+                    source={{ uri: item.companies.logo }}
+                    style={styles.jobLogo}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
+
               <View style={styles.row}>
-                <Image source={jobCompanyIcon} style={styles.icon} />
-                <Text style={styles.jobCompany}>{item.company}</Text>
+                <Text style={styles.jobCompany}>{item.companies?.name}</Text>
               </View>
 
               <View style={styles.row}>
@@ -109,24 +107,20 @@ const Index = () => {
               </View>
 
               <View style={styles.row}>
-                <Image source={jobTypeIcon} style={styles.icon} />
                 <Text style={styles.jobType}>{item.type}</Text>
               </View>
 
               <View style={styles.row}>
-                <Image source={moneyIcon} style={styles.icon} />
                 <Text style={styles.jobSalary}>Rp. {item.salary}</Text>
               </View>
 
               <View style={styles.row}>
-                <Image source={jobCategoryIcon} style={styles.icon} />
-                <Text style={styles.jobCategory}>
-                  {item.disability_category}
-                </Text>
+                <Text style={styles.jobCategory}>{item.category}</Text>
               </View>
 
               <Text style={styles.jobUrgent}>Dibutuhkan Segera</Text>
-            </View>
+            </Pressable>
+            </>
           )}
         />
       )}
@@ -137,6 +131,12 @@ const Index = () => {
 export default Index;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 32,
+    backgroundColor: "#FBFFE4",
+  },
   heading: {
     fontSize: 18,
     fontWeight: "bold",
@@ -155,36 +155,49 @@ const styles = StyleSheet.create({
   rekomendasiTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginTop: 18,
+    marginTop: 10,
     marginBottom: 10,
   },
+  categoryWrapper: {
+    marginBottom: 10,
+    paddingVertical: 4,
+    overflow: "visible",
+  },
+  categoryScrollContent: {
+    paddingHorizontal: 2,
+    overflow: "visible",
+  },
   categoryButton: {
-    width: 100,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
     borderWidth: 1,
     borderColor: "#10B981",
     marginRight: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
+    zIndex: 1,
   },
   categoryButtonSelected: {
     backgroundColor: "#10B981",
+    zIndex: 2,
   },
   categoryText: {
     fontSize: 14,
+    fontWeight: "500",
     color: "#10B981",
   },
   categoryTextSelected: {
-    color: "#FBFFE4",
+    color: "#ffffff",
   },
   jobCard: {
     padding: 12,
     backgroundColor: "#14B8A6",
     borderRadius: 12,
     marginBottom: 16,
-    width: "48%",
+    width: "48%"
   },
   jobTitle: {
     fontSize: 15,
@@ -196,10 +209,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
-  icon: {
-    width: 14,
-    height: 14,
-    marginRight: 6,
+  jobLogo: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    marginTop: 6,
+    marginBottom: 4,
   },
   jobCompany: {
     fontSize: 12,
