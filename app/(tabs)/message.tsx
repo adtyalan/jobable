@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Button, FlatList, Text, TextInput, View } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useSupabaseUser } from "../../hooks/useSupabaseUser";
 import { supabase } from "../../utils/supabase";
 
@@ -55,45 +56,47 @@ export default function Message() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              backgroundColor:
-                item.user_email === user.email ? "#d1f7c4" : "#fff",
-              alignSelf:
-                item.user_email === user.email ? "flex-end" : "flex-start",
-              marginVertical: 4,
-              padding: 10,
-              borderRadius: 10,
-              maxWidth: "80%",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>{item.user_email}</Text>
-            <Text>{item.content}</Text>
-          </View>
-        )}
-      />
-      <View style={{ flexDirection: "row", marginTop: 10 }}>
-        <TextInput
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: "#ccc",
-            borderRadius: 20,
-            paddingHorizontal: 16,
-            height: 40,
-            backgroundColor: "#fff",
-          }}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Ketik pesan..."
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, padding: 20 }}>
+        <FlatList
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                backgroundColor:
+                  item.user_email === user.email ? "#d1f7c4" : "#fff",
+                alignSelf:
+                  item.user_email === user.email ? "flex-end" : "flex-start",
+                marginVertical: 4,
+                padding: 10,
+                borderRadius: 10,
+                maxWidth: "80%",
+              }}
+            >
+              <Text style={{ fontWeight: "bold" }}>{item.user_email}</Text>
+              <Text>{item.content}</Text>
+            </View>
+          )}
         />
-        <Button title="Kirim" onPress={sendMessage} />
-      </View>
-    </View>
+        <View style={{ flexDirection: "row", marginTop: 10 }}>
+          <TextInput
+            style={{
+              flex: 1,
+              borderWidth: 1,
+              borderColor: "#ccc",
+              borderRadius: 20,
+              paddingHorizontal: 16,
+              height: 40,
+              backgroundColor: "#fff",
+            }}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Ketik pesan..."
+          />
+          <Button title="Kirim" onPress={sendMessage} />
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }

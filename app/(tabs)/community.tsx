@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../utils/supabase"; // pastikan path ini sesuai
 
 type Post = {
@@ -65,40 +66,44 @@ export default function Comunity() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.postCard}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.author}>
-              oleh {item.users.full_name || "Anonim"}
-            </Text>
-            <Text>{item.content}</Text>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, paddingVertical: 16 }}>
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.postCard}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.author}>
+                oleh {item.users.full_name || "Anonim"}
+              </Text>
+              <Text>{item.content}</Text>
 
-            <View style={styles.metaBar}>
-              <View style={styles.iconContainer}>
-                <AntDesign name="like2" size={24} color="black" />
-                <Text>{item.forum_likes?.length || 0}</Text>
-              </View>
-              <View style={styles.iconContainer}>
-                <MaterialCommunityIcons
-                  name="comment-outline"
-                  size={24}
-                  color="black"
-                />
-                <Text>{item.forum_comments?.length || 0}</Text>
-              </View>
-              <View style={styles.iconContainer}>
-                <Ionicons name="archive-outline" size={24} color="black" />
-                <Text>{item.forum_saves?.length || 0}</Text>
+              <View style={styles.metaBar}>
+                <View style={styles.likeCommentBar}>
+                  <View style={styles.iconContainer}>
+                    <AntDesign name="like2" size={24} color="black" />
+                    <Text>{item.forum_likes?.length || 0}</Text>
+                  </View>
+                  <View style={styles.iconContainer}>
+                    <MaterialCommunityIcons
+                      name="comment-outline"
+                      size={24}
+                      color="black"
+                    />
+                    <Text>{item.forum_comments?.length || 0}</Text>
+                  </View>
+                </View>
+                <View style={styles.iconContainer}>
+                  <Ionicons name="archive-outline" size={24} color="black" />
+                  <Text>{item.forum_saves?.length || 0}</Text>
+                </View>
               </View>
             </View>
-          </View>
-        )}
-      />
-    </SafeAreaView>
+          )}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -109,12 +114,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   postCard: {
-    marginHorizontal: 16,
+    marginHorizontal: Platform.OS === "web" ? 30 : 30,
     marginVertical: 8,
     padding: 16,
     backgroundColor: "#f4f4f4",
     borderRadius: 12,
-    elevation: 2,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: "#00A991",
   },
   title: {
     fontSize: 18,
@@ -136,5 +143,13 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: "center",
     paddingTop: 10,
+    flexDirection: "row",
+    gap: 4,
+  },
+  likeCommentBar: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    flex: 1,
+    gap: 20,
   },
 });
