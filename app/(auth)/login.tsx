@@ -39,7 +39,7 @@ export default function LoginPage() {
           <View style={styles.cardLogo}>
             <Image
               source={require("../../assets/images/icon.png")}
-              style={{ width: "100%", height: 100 }}
+              style={{ width: "100%", height: 100, contentFit: "cover" }}
             />
           </View>
           <View style={styles.card}>
@@ -52,7 +52,7 @@ export default function LoginPage() {
                 source={{ uri: "https://www.svgrepo.com/show/500472/back.svg" }}
               />
             </Pressable>
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>Masuk</Text>
             <TextInput
               placeholder="Email"
               onChangeText={setEmail}
@@ -69,14 +69,14 @@ export default function LoginPage() {
               value={password}
               style={styles.input}
             />
-            <Button title="Login" onPress={login} />
+            <Button title="Masuk" onPress={login} />
             <Link href={"/forgot-password"} style={styles.forgot}>
-              Forgot password?
+              Lupa password?
             </Link>
             <View style={styles.signupRow}>
               <Text>Don&#39;t have an account?</Text>
               <Pressable onPress={() => router.replace("/signup")}>
-                <Text style={styles.signupText}> Sign Up</Text>
+                <Text style={styles.signupText}> Daftar</Text>
               </Pressable>
             </View>
           </View>
@@ -111,26 +111,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.13,
     shadowRadius: 12,
-    elevation: 6,
+    elevation: 1,
     alignItems: "stretch",
   },
   cardLogo: {
     width: CARD_WIDTH,
-    backgroundColor: "#fff",
-    borderRadius: 18,
     padding: 28,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.13,
-    shadowRadius: 12,
-    elevation: 6,
     alignItems: "stretch",
     marginBottom: 24,
   },
   backBtn: {
     position: "absolute",
-    left: 18,
-    top: 18,
+    left: 32,
+    top: 42,
     zIndex: 1,
   },
   title: {
