@@ -1,3 +1,6 @@
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,7 +17,7 @@ type Post = {
   title: string;
   content: string;
   created_at: string;
-  forum_posts_user_id_fkey?: {
+  users: {
     full_name: string;
   };
   forum_likes: { id: string }[]; // Untuk hitung jumlah like
@@ -36,7 +39,7 @@ export default function Comunity() {
       .select(
         `
     id, title, content, created_at,
-    forum_posts_user_id_fkey(full_name),
+    users(full_name),
     forum_likes(id),
     forum_comments(id),
     forum_saves(id)
@@ -47,7 +50,6 @@ export default function Comunity() {
     if (error) {
       console.error("Error fetching posts:", error.message);
     } else {
-      console.log("DATA FORUM POSTS:", data); // Tambahkan ini
       setPosts(data);
     }
     setLoading(false);
@@ -71,14 +73,27 @@ export default function Comunity() {
           <View style={styles.postCard}>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.author}>
-              oleh {item.forum_posts_user_id_fkey?.full_name || "Anonim"}
+              oleh {item.users.full_name || "Anonim"}
             </Text>
             <Text>{item.content}</Text>
 
             <View style={styles.metaBar}>
-              <Text>❤️ {item.forum_likes?.length || 0}</Text>
-              <Text>💬 {item.forum_comments?.length || 0}</Text>
-              <Text>🔖 {item.forum_saves?.length || 0}</Text>
+              <View style={styles.iconContainer}>
+                <AntDesign name="like2" size={24} color="black" />
+                <Text>{item.forum_likes?.length || 0}</Text>
+              </View>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                  name="comment-outline"
+                  size={24}
+                  color="black"
+                />
+                <Text>{item.forum_comments?.length || 0}</Text>
+              </View>
+              <View style={styles.iconContainer}>
+                <Ionicons name="archive-outline" size={24} color="black" />
+                <Text>{item.forum_saves?.length || 0}</Text>
+              </View>
             </View>
           </View>
         )}
@@ -117,5 +132,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: "#ddd",
+  },
+  iconContainer: {
+    alignItems: "center",
+    paddingTop: 10,
   },
 });
