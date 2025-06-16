@@ -1,3 +1,4 @@
+import { useUserProfile } from "@/hooks/ProfileContext";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -17,9 +18,19 @@ import { supabase } from "../../utils/supabase";
 const categories = ["Tunarungu", "Tunanetra", "Tunawicara", "Tunadaksa"];
 
 const Index = () => {
+  const { profile } = useUserProfile(); // Ambil profile di sini
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Tunarungu");
+
+  // Fungsi untuk ucapan waktu
+  function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 4 && hour < 12) return "Selamat pagi";
+    if (hour >= 12 && hour < 18) return "Selamat siang";
+    if (hour >= 18 && hour < 22) return "Selamat malam";
+    return "Selamat malam";
+  }
 
   useEffect(() => {
     fetchJobs();
@@ -39,8 +50,16 @@ const Index = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <Text style={styles.heading}>Selamat pagi !</Text>
-        <Text style={styles.subheading}>Muhammad Abyan Aditya</Text>
+        <Text style={styles.heading}>
+          {profile?.full_name
+            ? `Selamat datang, ${profile.full_name}!`
+            : `${getGreeting()}!`}
+        </Text>
+        <Text style={styles.subheading}>
+          {profile?.full_name
+            ? "Semoga harimu menyenangkan."
+            : "Silakan login untuk pengalaman lebih baik."}
+        </Text>
 
         <Text style={styles.kategoriTitle}>Kategori</Text>
         <View style={styles.categoryWrapper}>
