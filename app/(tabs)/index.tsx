@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "react-native-url-polyfill/auto";
 import { supabase } from "../../utils/supabase";
 
@@ -37,96 +37,101 @@ const Index = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>Selamat pagi !</Text>
-      <Text style={styles.subheading}>Muhammad Abyan Aditya</Text>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.heading}>Selamat pagi !</Text>
+        <Text style={styles.subheading}>Muhammad Abyan Aditya</Text>
 
-      <Text style={styles.kategoriTitle}>Kategori</Text>
-      <View style={styles.categoryWrapper}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryScrollContent}
-        >
-          {categories.map((item) => (
-            <TouchableOpacity
-              key={item}
-              onPress={() => setSelectedCategory(item)}
-              style={[
-                styles.categoryButton,
-                selectedCategory === item && styles.categoryButtonSelected,
-              ]}
-            >
-              <Text
+        <Text style={styles.kategoriTitle}>Kategori</Text>
+        <View style={styles.categoryWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScrollContent}
+          >
+            {categories.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setSelectedCategory(item)}
                 style={[
-                  styles.categoryText,
-                  selectedCategory === item && styles.categoryTextSelected,
+                  styles.categoryButton,
+                  selectedCategory === item && styles.categoryButtonSelected,
                 ]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
               >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategory === item && styles.categoryTextSelected,
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-      <Text style={styles.rekomendasiTitle}>Rekomendasi</Text>
+        <Text style={styles.rekomendasiTitle}>Rekomendasi</Text>
 
-      {loading ? (
-        <Text>Loading…</Text>
-      ) : (
-        <FlatList
-          data={jobs}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: "space-between" }}
-          renderItem={({ item }) => (
-            <>
-              <Pressable
-                style={styles.jobCard}
-                onPress={() => router.push("/jobs")}
-              >
-                <Text style={styles.jobTitle}>{item.title}</Text>
+        {loading ? (
+          <Text>Loading…</Text>
+        ) : (
+          <FlatList
+            data={jobs}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: "space-between" }}
+            renderItem={({ item }) => (
+              <>
+                <Pressable
+                  style={styles.jobCard}
+                  onPress={() => router.push("/jobs")}
+                >
+                  <Text style={styles.jobTitle}>{item.title}</Text>
 
-                {item.companies?.logo && (
+                  {item.companies?.logo && (
+                    <View style={styles.row}>
+                      <Image
+                        source={{ uri: item.companies.logo }}
+                        style={styles.jobLogo}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  )}
+
                   <View style={styles.row}>
-                    <Image
-                      source={{ uri: item.companies.logo }}
-                      style={styles.jobLogo}
-                      resizeMode="contain"
-                    />
+                    <Text style={styles.jobCompany}>
+                      {item.companies?.name}
+                    </Text>
                   </View>
-                )}
 
-                <View style={styles.row}>
-                  <Text style={styles.jobCompany}>{item.companies?.name}</Text>
-                </View>
+                  <View style={styles.row}>
+                    <Text style={styles.jobLocation}>{item.location}</Text>
+                  </View>
 
-                <View style={styles.row}>
-                  <Text style={styles.jobLocation}>{item.location}</Text>
-                </View>
+                  <View style={styles.row}>
+                    <Text style={styles.jobType}>{item.type}</Text>
+                  </View>
 
-                <View style={styles.row}>
-                  <Text style={styles.jobType}>{item.type}</Text>
-                </View>
+                  <View style={styles.row}>
+                    <Text style={styles.jobSalary}>Rp. {item.salary}</Text>
+                  </View>
 
-                <View style={styles.row}>
-                  <Text style={styles.jobSalary}>Rp. {item.salary}</Text>
-                </View>
+                  <View style={styles.row}>
+                    <Text style={styles.jobCategory}>{item.category}</Text>
+                  </View>
 
-                <View style={styles.row}>
-                  <Text style={styles.jobCategory}>{item.category}</Text>
-                </View>
-
-                <Text style={styles.jobUrgent}>Dibutuhkan Segera</Text>
-              </Pressable>
-            </>
-          )}
-        />
-      )}
-    </SafeAreaView>
+                  <Text style={styles.jobUrgent}>Dibutuhkan Segera</Text>
+                </Pressable>
+              </>
+            )}
+          />
+        )}
+      </SafeAreaView>
+      );
+    </SafeAreaProvider>
   );
 };
 
