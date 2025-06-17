@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const ApplicationForm = () => {
@@ -18,15 +18,15 @@ const ApplicationForm = () => {
   const [email, setEmail] = useState("");
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={{ padding: 16 }}>
-       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity>
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Ajukan Lamaran</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={{ padding: 16 }}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Ajukan Lamaran</Text>
+        </View>
 
 
         {/* Job Info */}

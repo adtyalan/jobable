@@ -37,6 +37,7 @@ const JobDetail = () => {
           <View style={styles.logoCircle}>
             <Text style={styles.logoText}>🔥</Text>
           </View>
+
           <View style={styles.headerContent}>
             <Text style={styles.company}>
               PT Telkom Indonesia • Surabaya, Jawa Timur
