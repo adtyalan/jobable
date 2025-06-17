@@ -87,6 +87,7 @@ function InnerTabs() {
           borderTopLeftRadius: 20,
           marginHorizontal: 20,
           marginBottom: Platform.OS === "web" ? 0 : 15,
+          position: "absolute",
         },
         tabBarIconStyle: {
           marginTop: Platform.OS === "web" ? 0 : 5,
