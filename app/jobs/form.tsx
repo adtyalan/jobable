@@ -18,14 +18,22 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../utils/supabase";
 
 const ApplicationForm = () => {
-  const [selectedSection, setSelectedSection] = useState("Pengalaman");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [resume, setResume] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  type ResumeAsset = {
+    name: string;
+    uri: string;
+    mimeType: string;
+    [key: string]: any;
+  };
+  const [resume, setResume] = useState<ResumeAsset | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // State untuk loading submit
 
   const { id } = useLocalSearchParams();
   const [job, setJob] = useState<any>(null);
@@ -47,24 +55,38 @@ const ApplicationForm = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    // Ambil session user saat ini
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data?.user ?? null);
+    };
+    getUser();
+  }, []);
+
   // Fungsi untuk memilih file
+  // Fungsi untuk memilih file (SUDAH DIPERBAIKI)
   const pickResume = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ],
-      copyToCacheDirectory: true,
-      multiple: false,
-    });
-    if (
-      result.type === "success" &&
-      result.assets &&
-      result.assets.length > 0
-    ) {
-      setResume(result.assets[0]);
-      console.log("Resume terpilih:", result.assets[0]);
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ],
+        copyToCacheDirectory: true,
+      });
+
+      // Ganti pemeriksaan dari 'result.type === "success"' menjadi '!result.canceled'
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setResume(result.assets[0]);
+        console.log("Resume terpilih:", result.assets[0]);
+      } else {
+        console.log("Pemilihan file dibatalkan atau gagal.");
+      }
+    } catch (error) {
+      console.error("Terjadi error saat memilih dokumen:", error);
+      // Anda bisa menampilkan pesan error kepada pengguna di sini jika perlu
     }
   };
 
@@ -86,36 +108,93 @@ const ApplicationForm = () => {
     return true;
   }
 
-  // Submit handler
+  // Submit handler (VERSI BARU)
   async function handleSubmit() {
     Keyboard.dismiss();
     setSuccess(null);
-    if (!validate()) return;
+    setError(null);
 
-    const { error: insertError } = await supabase.from("applications").insert([
-      {
-        job_id: job?.id,
-        company_id: job?.companies?.id,
-        name,
-        address,
-        phone,
-        email,
-        section: selectedSection,
-      },
-    ]);
-    if (insertError) {
-      setError("Gagal mengirim lamaran. Silakan coba lagi.");
-    } else {
+    // 0. Validasi awal
+    if (!validate()) return;
+    if (!resume) {
+      setError("Resume wajib diunggah.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 1. Persiapkan file untuk diunggah
+      // Menggunakan ekstensi file asli dari nama file
+      const fileExt = resume.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `private/${fileName}`; // Folder 'private' di dalam bucket 'resumes'
+
+      // Supabase di React Native memerlukan kita untuk mengubah URI file lokal menjadi format yang bisa diunggah
+      // Kita bisa menggunakan fetch untuk mendapatkan file sebagai blob
+      const response = await fetch(resume.uri);
+      const blob = await response.blob();
+
+      // 2. Unggah file ke Supabase Storage
+      const { data, error: uploadError } = await supabase.storage
+        .from("resumes") // Nama bucket yang Anda buat
+        .upload(filePath, blob, {
+          contentType: resume.mimeType,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(`Gagal mengunggah resume: ${uploadError.message}`);
+      }
+
+      // 3. Dapatkan URL publik dari file yang diunggah
+      const { data: urlData } = supabase.storage
+        .from("resumes")
+        .getPublicUrl(filePath);
+
+      if (!urlData || !urlData.publicUrl) {
+        throw new Error("Gagal mendapatkan URL publik untuk resume.");
+      }
+      const resumeUrl = urlData.publicUrl;
+
+      // 4. Simpan semua data (termasuk URL resume) ke tabel 'applications'
+      const { error: insertError } = await supabase
+        .from("applications")
+        .insert([
+          {
+            job_id: job?.id,
+            user_id: user?.id,
+            name,
+            address,
+            phone,
+            email,
+            cv_url: resumeUrl, // <-- Simpan URL di sini
+            status: "pending",
+          },
+        ]);
+
+      if (insertError) {
+        throw new Error(`Gagal mengirim lamaran: ${insertError.message}`);
+      }
+
+      // 5. Reset form jika berhasil
       setSuccess("Lamaran berhasil dikirim!");
       setName("");
       setAddress("");
       setPhone("");
       setEmail("");
-      setSelectedSection("Pengalaman");
+      setResume(null); // Jangan lupa reset state resume
       setError(null);
+
       setTimeout(() => {
         router.replace("/"); // Kembali ke halaman utama setelah submit
       }, 1500);
+    } catch (err: any) {
+      // Tangkap semua jenis error (upload, get URL, insert)
+      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      // Pastikan loading state selalu kembali ke false
+      setIsSubmitting(false);
     }
   }
 
@@ -248,27 +327,6 @@ const ApplicationForm = () => {
               </Text>
             )}
 
-            <Text style={styles.label}>Sertakan Bagian Profil</Text>
-            {["Pengalaman", "Pendidikan", "Keahlian"].map((item) => (
-              <TouchableOpacity
-                key={item}
-                onPress={() => setSelectedSection(item)}
-                style={styles.radioRow}
-              >
-                <View
-                  style={[
-                    styles.radioOuter,
-                    selectedSection === item && styles.radioOuterSelected,
-                  ]}
-                >
-                  {selectedSection === item && (
-                    <View style={styles.radioInner} />
-                  )}
-                </View>
-                <Text style={styles.radioLabel}>{item}</Text>
-              </TouchableOpacity>
-            ))}
-
             <Text style={styles.footerNote}>
               Jaga diri Anda. Jangan sertakan informasi sensitif dalam dokumen
               anda.
@@ -283,8 +341,17 @@ const ApplicationForm = () => {
           </ScrollView>
 
           {/* Submit Button */}
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitText}>Ajukan</Text>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              isSubmitting && { backgroundColor: "#999" }, // Warna abu-abu saat loading
+            ]}
+            onPress={handleSubmit}
+            disabled={isSubmitting} // Nonaktifkan tombol saat loading
+          >
+            <Text style={styles.submitText}>
+              {isSubmitting ? "Mengirim..." : "Ajukan"}
+            </Text>
           </TouchableOpacity>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -385,39 +452,12 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginTop: 6,
-    width: 100,
+    width: "100%",
   },
   uploadText: {
     marginLeft: 6,
     color: "#00B388",
     fontWeight: "600",
-  },
-  radioRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#aaa",
-    marginRight: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  radioOuterSelected: {
-    borderColor: "#00B388",
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    backgroundColor: "#00B388",
-    borderRadius: 5,
-  },
-  radioLabel: {
-    fontSize: 14,
   },
   footerNote: {
     marginTop: 30,

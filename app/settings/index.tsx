@@ -34,8 +34,7 @@ export default function Settings() {
     {
       icon: <Ionicons name="notifications-outline" size={24} color="black" />,
       label: "Notifikasi",
-      onPress: () =>
-        handleProtectedPress(() => router.push("/settings/notifications")),
+      onPress: () => router.push("/settings/notifications"),
     },
     {
       icon: <MaterialIcons name="password" size={24} color="black" />,
