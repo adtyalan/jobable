@@ -1,4 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { router } from "expo-router";
 import {
   SafeAreaView,
   ScrollView,
@@ -12,9 +14,19 @@ export default function Applications() {
   return (
     <>
       <SafeAreaView style={styles.mainContainer}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => router.push("/(tabs)/profile")}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Ajukan Lamaran</Text>
+        </View>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.groupJob}>
-            <TouchableOpacity style={styles.jobContainer}>
+            <TouchableOpacity
+              style={styles.jobContainer}
+              onPress={() => router.push("/applications/progress")}
+            >
               <View style={styles.groupAll}>
                 <View style={styles.logoContainer}>
                   <Text style={{ fontSize: 40 }}>🫦</Text>
@@ -50,7 +62,6 @@ const styles = StyleSheet.create({
 
   groupJob: {
     gap: 10,
-    marginVertical: 20,
     marginHorizontal: 20,
   },
 
@@ -106,5 +117,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 12,
+    marginBottom: 16,
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 12,
+    marginBottom: 16,
   },
 });

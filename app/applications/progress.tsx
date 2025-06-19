@@ -1,10 +1,25 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import ProgressTracker from "./components/timeline"; // 1. Impor komponen
 
 export default function Applications() {
   return (
     <>
       <SafeAreaView style={styles.mainContainer}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => router.push("/applications")}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Ajukan Lamaran</Text>
+        </View>
         {/* Bagian Atas: Info Pekerjaan (Tidak Berubah) */}
         <View style={styles.jobContainer}>
           <View style={styles.groupAll}>
@@ -50,7 +65,7 @@ const styles = StyleSheet.create({
     paddingVertical: 25,
     backgroundColor: "#00A991",
     borderRadius: 20,
-    marginVertical: 20,
+    marginBottom: 20,
     marginHorizontal: 20,
     alignContent: "center",
   },
@@ -87,5 +102,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#B0E4DD",
     paddingVertical: 10,
     paddingHorizontal: 20,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 12,
+    marginBottom: 16,
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 12,
+    marginBottom: 16,
   },
 });
