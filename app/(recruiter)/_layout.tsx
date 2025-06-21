@@ -59,6 +59,14 @@ export default function RecruiterLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="business-outline" size={24} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="jobList/[id]" // Anda perlu membuat file app/(recruiter)/company-profile.tsx
+        options={{
+          href: null,
+          headerShown: false, // Sembunyikan header untuk halaman ini
+          tabBarStyle: { display: 'none' }, // Sembunyikan tab bar untuk halaman ini
+        }}
+      />
     </Tabs>
   );
 }

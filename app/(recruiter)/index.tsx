@@ -65,7 +65,7 @@ export default function EmployerDashboard() {
               <Pressable
                 key={job.id}
                 style={styles.jobCard}
-                onPress={() => router.push(`/jobs/${job?.id}`)}
+                onPress={() => router.push(`./jobList/${job?.id}`)}
               >
                 <View style={styles.jobHeader}>
                   <Text style={styles.jobTitle}>{job.title}</Text>

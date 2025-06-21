@@ -43,10 +43,10 @@ export default function LoginPage() {
     // Arahkan berdasarkan peran
     if (userProfile?.role === 'recruiter') {
       // atau 'recruiter'
-      router.replace('/(recruiter)/index'); // Arahkan ke halaman utama recruiter
+      router.replace('../(recruiter)/'); // Arahkan ke halaman utama recruiter
       console.log(`User dengan ID ${userId} adalah recruiter.`);
     } else {
-      router.replace('/'); // Arahkan ke halaman utama job seeker
+      router.replace('../(tabs)'); // Arahkan ke halaman utama job seeker
       console.log(`User dengan ID ${userId} adalah job seeker.`);
     }
   };

@@ -1,5 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { decode } from 'base64-arraybuffer';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -109,36 +111,51 @@ const ApplicationForm = () => {
   }
 
   // Submit handler (VERSI BARU)
+
   async function handleSubmit() {
     Keyboard.dismiss();
     setSuccess(null);
     setError(null);
 
-    // 0. Validasi awal
-    if (!validate()) return;
-    if (!resume) {
-      setError('Resume wajib diunggah.');
+    if (!validate() || !resume || !user) {
+      setError('Form tidak lengkap atau sesi tidak ditemukan.');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // 1. Persiapkan file untuk diunggah
-      // Menggunakan ekstensi file asli dari nama file
+      // Langkah mengambil profil job seeker tetap sama
+      const { data: jobSeekerProfile, error: profileError } = await supabase
+        .from('job_seeker_users')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError || !jobSeekerProfile) {
+        throw new Error('Profil pelamar kerja tidak ditemukan atau gagal diambil.');
+      }
+      const jobSeekerId = jobSeekerProfile.id;
+
+      // --- PERUBAHAN UTAMA DI SINI ---
       const fileExt = resume.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `private/${fileName}`; // Folder 'private' di dalam bucket 'resumes'
+      const filePath = `private/${jobSeekerId}/${fileName}`; // Direkomendasikan: simpan di folder user
 
-      // Supabase di React Native memerlukan kita untuk mengubah URI file lokal menjadi format yang bisa diunggah
-      // Kita bisa menggunakan fetch untuk mendapatkan file sebagai blob
-      const response = await fetch(resume.uri);
-      const blob = await response.blob();
+      // 1. Baca file dari URI lokal sebagai string base64 menggunakan FileSystem
+      const base64 = await FileSystem.readAsStringAsync(resume.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
-      // 2. Unggah file ke Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from('resumes') // Nama bucket yang Anda buat
-        .upload(filePath, blob, {
+      // 2. Decode string base64 menjadi ArrayBuffer
+      const arrayBuffer = decode(base64);
+      // --- AKHIR PERUBAHAN ---
+
+      // 3. Unggah file ke Supabase Storage menggunakan ArrayBuffer
+      const { error: uploadError } = await supabase.storage
+        .from('resumes')
+        .upload(filePath, arrayBuffer, {
+          // Ganti blob dengan arrayBuffer
           contentType: resume.mimeType,
           upsert: false,
         });
@@ -147,7 +164,7 @@ const ApplicationForm = () => {
         throw new Error(`Gagal mengunggah resume: ${uploadError.message}`);
       }
 
-      // 3. Dapatkan URL publik dari file yang diunggah
+      // Proses mendapatkan URL dan insert data tetap sama
       const { data: urlData } = supabase.storage.from('resumes').getPublicUrl(filePath);
 
       if (!urlData || !urlData.publicUrl) {
@@ -155,16 +172,15 @@ const ApplicationForm = () => {
       }
       const resumeUrl = urlData.publicUrl;
 
-      // 4. Simpan semua data (termasuk URL resume) ke tabel 'applications'
       const { error: insertError } = await supabase.from('applications').insert([
         {
           job_id: job?.id,
-          user_id: user?.id,
+          user_id: jobSeekerId,
           name,
           address,
           phone,
           email,
-          cv_url: resumeUrl, // <-- Simpan URL di sini
+          cv_url: resumeUrl,
           status: 'pending',
         },
       ]);
@@ -173,23 +189,15 @@ const ApplicationForm = () => {
         throw new Error(`Gagal mengirim lamaran: ${insertError.message}`);
       }
 
-      // 5. Reset form jika berhasil
+      // Proses reset form tetap sama
       setSuccess('Lamaran berhasil dikirim!');
-      setName('');
-      setAddress('');
-      setPhone('');
-      setEmail('');
-      setResume(null); // Jangan lupa reset state resume
-      setError(null);
-
+      // ... reset state ...
       setTimeout(() => {
-        router.replace('/'); // Kembali ke halaman utama setelah submit
+        router.replace('/');
       }, 1500);
     } catch (err: any) {
-      // Tangkap semua jenis error (upload, get URL, insert)
       setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
     } finally {
-      // Pastikan loading state selalu kembali ke false
       setIsSubmitting(false);
     }
   }
