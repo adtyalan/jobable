@@ -4,15 +4,16 @@ import { PengalamanItem, useAboutExp } from "@/hooks/useAboutExp";
 import { KeahlianItem, useAboutSkills } from "@/hooks/useAboutSkills"; // Impor hook baru
 import { AboutUserData, useAboutUser } from "@/hooks/useAboutUser"; // Impor hook baru
 import { supabase } from "@/utils/supabase";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Button,
+  Image, // <-- TAMBAHKAN INI
   Keyboard,
   Modal,
-  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -387,23 +388,30 @@ export default function ApplicationsPage() {
   const { user, loading: userLoading, profile } = useUserProfile();
   const {
     education,
-    setEducation,
     loading: educationLoading,
+    addEducation,
+    updateEducation,
+    deleteEducation,
   } = useAboutEducation(user?.id);
   const {
     experience,
-    setExperience,
     loading: experienceLoading,
+    addExperience,
+    updateExperience,
+    deleteExperience,
   } = useAboutExp(user?.id);
   const {
     skills,
-    setSkills,
     loading: skillsLoading,
-  } = useAboutSkills(user?.id); // Panggil hook baru
+    addSkill,
+    updateSkill,
+    deleteSkill,
+  } = useAboutSkills(user?.id);
+
   const {
     aboutData,
-    setAboutData,
     loading: aboutLoading,
+    updateAboutList,
   } = useAboutUser(user?.id);
 
   const [selectedCategory, setSelectedCategory] = useState("Tentang");
@@ -460,295 +468,87 @@ export default function ApplicationsPage() {
     );
   }
 
-  const handleAddExperience = async () => {
-    if (!user || !newExperience.position || !newExperience.workplace) {
-      alert("Role dan Perusahaan wajib diisi.");
-      return;
-    }
+  const handleSaveAboutChanges = async () => {
+    if (!user || !modalType) return;
+
+    // Konversi tipe modal menjadi nama kolom yang valid
+    const dbColumnName = modalType.toLowerCase().replace(/ /g, "_") as
+      | "aksesibilitas"
+      | "preferensi_kerja"
+      | "keterampilan_khusus";
+
     try {
-      const { data: newEntry, error } = await supabase
-        .from("about_user_exp")
-        .insert({ ...newExperience, user_id: user.id })
-        .select()
-        .single();
-      if (error) {
-        throw error;
-      }
-      if (newEntry) {
-        setExperience((prevExperience) => [newEntry, ...prevExperience]);
-      }
+      await updateAboutList(dbColumnName, listInModal); // Panggil fungsi dari hook
+      Alert.alert("Sukses", "Data berhasil diperbarui.");
       closeModal();
     } catch (error) {
-      console.error("Error adding experience:", (error as Error).message);
-      alert("Gagal menambahkan pengalaman. Coba lagi.");
+      Alert.alert("Gagal", "Gagal menyimpan perubahan.");
+      console.error(error);
     }
   };
-  const handleAddEducation = async () => {
-    if (!user || !newEducation.instance || !newEducation.major) {
-      alert("Nama institusi dan jurusan wajib diisi.");
-      return;
-    }
-    try {
-      const { data: newEntry, error } = await supabase
-        .from("about_user_edu")
-        .insert({ ...newEducation, user_id: user.id, status: "Lulus" })
-        .select()
-        .single();
-      if (error) throw error;
-      if (newEntry) {
-        setEducation((prevEducation) => [newEntry, ...prevEducation]);
+
+  const handleDeleteItem = () => {
+    const performDelete = async () => {
+      if (!editingItem) return;
+      try {
+        if (modalType === "Pengalaman") await deleteExperience(editingItem.id);
+        else if (modalType === "Pendidikan")
+          await deleteEducation(editingItem.id);
+        else if (modalType === "Keahlian") await deleteSkill(editingItem);
+        closeModal();
+      } catch (error) {
+        Alert.alert("Gagal", `Gagal menghapus data ${modalType}.`);
+        console.error(error);
       }
-      closeModal();
-    } catch (error) {
-      console.error("Error adding education:", (error as Error).message);
-      alert("Gagal menambahkan pendidikan. Coba lagi.");
-    }
+    };
+
+    Alert.alert(`Hapus ${modalType}`, `Anda yakin ingin menghapus data ini?`, [
+      { text: "Batal", style: "cancel" },
+      { text: "Ya, Hapus", style: "destructive", onPress: performDelete },
+    ]);
   };
-  const handleAddSkill = async () => {
-    if (!user || !newSkill.name) {
-      alert("Nama keahlian wajib diisi.");
-      return;
-    }
-    const currentSkillNames = skills.map((s) => s.name);
-    const updatedSkillsArray = [...currentSkillNames, newSkill.name];
-    try {
-      const { error } = await supabase
-        .from("about_user_skills")
-        .update({ skill: updatedSkillsArray })
-        .eq("user_id", user.id);
-      if (error) throw error;
-      const newSkillObject: KeahlianItem = {
-        id: skills.length + 1,
-        name: newSkill.name,
-      };
-      setSkills((prevSkills) => [...prevSkills, newSkillObject]);
-      closeModal();
-    } catch (error) {
-      console.error("Error adding skill:", (error as Error).message);
-      alert("Gagal menambahkan keahlian. Coba lagi.");
-    }
-  };
+
   const handleAddNewItemToList = () => {
-    if (newItemText.trim() === "") {
-      Alert.alert("Input Kosong", "Harap isi data sebelum menambahkannya.");
-      return;
-    }
+    if (newItemText.trim() === "")
+      return Alert.alert("Input Kosong", "Harap isi data.");
     setListInModal((currentList) => [...currentList, newItemText.trim()]);
     setNewItemText("");
     setAddItemModalVisible(false);
   };
 
-  const handleUpdateExperience = async () => {
-    if (!editingItem || !user) {
-      alert("Error: Tidak ada item yang dipilih untuk diedit.");
-      return;
-    }
+  const handleModalSubmit = async () => {
     try {
-      const { data: updatedEntry, error } = await supabase
-        .from("about_user_exp")
-        .update(newExperience)
-        .eq("id", editingItem.id) // Filter berdasarkan ID item yang diedit
-        .select()
-        .single();
-      if (error) throw error;
-      if (updatedEntry && typeof updatedEntry.id !== "undefined") {
-        setExperience((prevExperience) =>
-          prevExperience.map((item) => {
-            if (typeof item.id === "undefined") return item;
-            return String(item.id) === String(updatedEntry.id)
-              ? updatedEntry
-              : item;
-          })
-        );
+      if (editingItem) {
+        // --- LOGIKA EDIT ---
+        if (modalType === "Pengalaman") {
+          await updateExperience(editingItem.id, newExperience);
+        } else if (modalType === "Pendidikan") {
+          await updateEducation(editingItem.id, newEducation);
+        } else if (modalType === "Keahlian") {
+          if (!newSkill.name)
+            return Alert.alert("Error", "Nama keahlian tidak boleh kosong.");
+          await updateSkill(editingItem, newSkill.name);
+        }
       } else {
-        console.warn(
-          "Update di database berhasil, tapi data tidak kembali. UI perlu di-refresh manual."
-        );
+        // --- LOGIKA TAMBAH ---
+        if (modalType === "Pengalaman") {
+          if (!newExperience.position || !newExperience.workplace)
+            return Alert.alert("Error", "Posisi dan Perusahaan wajib diisi.");
+          await addExperience(newExperience);
+        } else if (modalType === "Pendidikan") {
+          if (!newEducation.instance || !newEducation.major)
+            return Alert.alert("Error", "Institusi dan Jurusan wajib diisi.");
+          await addEducation(newEducation);
+        } else if (modalType === "Keahlian") {
+          if (!newSkill.name)
+            return Alert.alert("Error", "Nama keahlian wajib diisi.");
+          await addSkill(newSkill.name);
+        }
       }
-      closeModal();
+      closeModal(); // Tutup modal jika salah satu aksi di atas berhasil
     } catch (error) {
-      console.error("Error updating experience:", (error as Error).message);
-      alert("Gagal memperbarui data pengalaman. Coba lagi.");
-    }
-  };
-  const handleUpdateEducation = async () => {
-    if (!editingItem || !user) {
-      alert("Error: data tidak ditemukan.");
-      return;
-    }
-    try {
-      const { data: updatedEntry, error } = await supabase
-        .from("about_user_edu")
-        .update(newEducation)
-        .eq("id", editingItem.id)
-        .select()
-        .single();
-      if (error) throw error;
-      if (updatedEntry) {
-        setEducation((prev) =>
-          prev.map((item) =>
-            item.id === updatedEntry.id ? updatedEntry : item
-          )
-        );
-      }
-      closeModal();
-    } catch (error) {
-      console.error("Error updating education:", (error as Error).message);
-      alert("Gagal memperbarui data pendidikan");
-    }
-  };
-  const handleUpdateSkill = async () => {
-    if (!editingItem || !user || !newSkill.name) {
-      alert("Nama keahlian tidak boleh kosong.");
-      return;
-    }
-    try {
-      const updatedSkillsArray = skills.map((skill) =>
-        skill.id === editingItem.id ? newSkill.name : skill.name
-      );
-      const { error } = await supabase
-        .from("about_user_skills")
-        .update({ skill: updatedSkillsArray })
-        .eq("user_id", user.id);
-      if (error) throw error;
-      setSkills((prevSkills) =>
-        prevSkills.map((skill) =>
-          skill.id === editingItem.id
-            ? { ...skill, name: newSkill.name as string } // Gunakan type assertion
-            : skill
-        )
-      );
-      closeModal();
-    } catch (error) {
-      console.error("Error updating skill:", (error as Error).message);
-      alert("Gagal memperbarui keahlian.");
-    }
-  };
-  const handleUpdateAboutArray = async () => {
-    if (!user || !editingItem || !modalType) return;
-
-    const dbColumnName = modalType
-      .toLowerCase()
-      .replace(/ /g, "_") as keyof AboutUserData;
-    const dataToUpdate = { [dbColumnName]: listInModal };
-
-    try {
-      const { data: updatedData, error } = await supabase
-        .from("about_user")
-        .update(dataToUpdate)
-        .eq("user_id", user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      if (updatedData) setAboutData(updatedData); // Perbarui state utama
-
-      Alert.alert("Sukses", "Data berhasil diperbarui.");
-      closeModal();
-    } catch (error) {
-      console.error("Error updating about data:", (error as Error).message);
-      Alert.alert("Gagal", "Gagal menyimpan perubahan.");
-    }
-  };
-
-  const handleDeleteExperience = async () => {
-    if (!editingItem) return;
-    try {
-      const { error } = await supabase
-        .from("about_user_exp")
-        .delete()
-        .eq("id", editingItem.id);
-      if (error) throw error;
-      setExperience((prev) =>
-        prev.filter((item) => item.id !== editingItem.id)
-      );
-      closeModal();
-    } catch (error) {
-      console.error("Error deleting experience:", (error as Error).message);
-      Alert.alert("Gagal menghapus pengalaman.");
-    }
-  };
-  const handleDeleteEducation = async () => {
-    if (!editingItem) return;
-    try {
-      const { error } = await supabase
-        .from("about_user_edu")
-        .delete()
-        .eq("id", editingItem.id);
-      if (error) throw error;
-      setEducation((prev) => prev.filter((item) => item.id !== editingItem.id));
-      closeModal();
-    } catch (error) {
-      console.error("Error deleting education:", (error as Error).message);
-      alert("Gagal menghapus pendidikan.");
-    }
-  };
-  const handleDeleteSkill = async () => {
-    if (!editingItem) return;
-    try {
-      const updatedSkillsArray = skills
-        .map((s) => s.name)
-        .filter((name) => name !== editingItem.name);
-      const { error } = await supabase
-        .from("about_user_skills")
-        .update({ skill: updatedSkillsArray })
-        .eq("user_id", user.id);
-      if (error) throw error;
-      setSkills((prev) => prev.filter((skill) => skill.id !== editingItem.id));
-      closeModal();
-    } catch (error) {
-      console.error("Error deleting skill:", (error as Error).message);
-      alert("Gagal menghapus keahlian.");
-    }
-  };
-
-  const handleDeleteItem = () => {
-    const performDelete = () => {
-      if (modalType === "Pengalaman") handleDeleteExperience();
-      else if (modalType === "Pendidikan") handleDeleteEducation();
-      else if (modalType === "Keahlian") handleDeleteSkill();
-    };
-    if (Platform.OS === "web") {
-      if (
-        window.confirm(
-          `Apakah Anda yakin ingin menghapus data ${modalType} ini? Aksi ini tidak dapat dibatalkan.`
-        )
-      ) {
-        performDelete();
-      }
-    } else {
-      Alert.alert(
-        `Hapus ${modalType}`, // Judul
-        `Apakah Anda yakin ingin menghapus data ini? Aksi ini tidak dapat dibatalkan.`, // Pesan
-        [
-          { text: "Batal", style: "cancel" },
-          {
-            text: "Ya, Hapus",
-            style: "destructive",
-            onPress: performDelete, // Jalankan fungsi hapus jika ditekan
-          },
-        ]
-      );
-    }
-  };
-
-  const handleModalSubmit = () => {
-    if (editingItem) {
-      if (modalType === "Pengalaman") {
-        handleUpdateExperience();
-      } else if (modalType === "Pendidikan") {
-        handleUpdateEducation();
-      } else if (modalType === "Keahlian") {
-        handleUpdateSkill();
-      }
-    } else {
-      if (modalType === "Pengalaman") {
-        handleAddExperience();
-      } else if (modalType === "Pendidikan") {
-        handleAddEducation();
-      } else if (modalType === "Keahlian") {
-        handleAddSkill();
-      }
+      Alert.alert("Gagal", `Gagal memproses data ${modalType}.`);
+      console.error(error);
     }
   };
 
@@ -795,11 +595,6 @@ export default function ApplicationsPage() {
     setNewSkill({ name: "" });
   };
 
-  // const openModal = (type: string) => {
-  //   setModalType(type);
-  //   setModalVisible(true);
-  // };
-
   const renderModalContent = () => {
     if (
       ["Aksesibilitas", "Preferensi Kerja", "Keterampilan Khusus"].includes(
@@ -811,7 +606,7 @@ export default function ApplicationsPage() {
           modalType={modalType}
           listInModal={listInModal}
           setListInModal={setListInModal}
-          onSave={handleUpdateAboutArray}
+          onSave={handleSaveAboutChanges}
           onOpenAddItem={() => setAddItemModalVisible(true)}
         />
       );
@@ -937,6 +732,23 @@ export default function ApplicationsPage() {
       </TouchableOpacity>
     ));
   };
+  // Fungsi untuk mengubah string menjadi format "Capitalize Each Word"
+  // Contoh: "tuna netra" -> "Tuna Netra" atau "tunanetra" -> "Tunanetra"
+  const capitalizeEachWord = (str: string): string => {
+    if (!str) return ""; // Menangani jika inputnya kosong
+    return str
+      .split(" ") // 1. Pecah string menjadi array kata (berdasarkan spasi)
+      .map(
+        (word) =>
+          // 2. Untuk setiap kata, ubah huruf pertama menjadi besar + sisa huruf menjadi kecil
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      )
+      .join(" "); // 3. Gabungkan kembali array menjadi satu string
+  };
+
+  const disabilityStatus = capitalizeEachWord(
+    profile?.job_seeker_users?.[0]?.disability || "Belum Diisi"
+  );
 
   return (
     <>
@@ -954,7 +766,6 @@ export default function ApplicationsPage() {
           }}
         >
           <TouchableWithoutFeedback>
-            {/* Semua konten diputuskan oleh fungsi renderModalContent */}
             {renderModalContent()}
           </TouchableWithoutFeedback>
         </Pressable>
@@ -994,19 +805,32 @@ export default function ApplicationsPage() {
 
       <SafeAreaView style={styles.mainContainer}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <TouchableOpacity style={styles.profileCircle}>
-            <View style={styles.difableContainer}>
-              <Text style={styles.difableText}>Tunanetra</Text>
-            </View>
+          <TouchableOpacity
+            style={styles.editButtonContainer}
+            onPress={() => router.push("/profileEdit")} // atau "/profileEdit"
+          >
+            <FontAwesome6 name="edit" size={20} color="#1E88E5" />
           </TouchableOpacity>
+          <View style={styles.profileCircle}>
+            <Image
+              source={{
+                uri: profile?.avatar || "https://i.pravatar.cc/112",
+              }}
+              style={styles.profileImage}
+            />
+            <View style={styles.difableContainer}>
+              <Text style={styles.difableText}>{disabilityStatus}</Text>
+            </View>
+          </View>
 
           <Text style={styles.nameText}>
             {profile?.full_name || "Nama Pengguna"}
           </Text>
           <View style={styles.containerNameFollow}>
-            <Text style={styles.followText}>259{"\u2028"}koneksi</Text>
-            <Text style={styles.rotatedline} />
-            <Text style={styles.followText}>469{"\u2028"}pengikut</Text>
+            <Text style={styles.followText}>
+              {profile?.job_seeker_users?.[0]?.biography ||
+                "Bio belum diisi. Klik tombol edit untuk menambahkan."}
+            </Text>
           </View>
 
           <Text style={styles.progressHeading}>Pantau Lamaran</Text>
@@ -1061,10 +885,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: "#FBFFE4",
-    // alignItems: 'center',
     paddingLeft: 20,
     paddingRight: 20,
-    // justifyContent: 'center',
   },
 
   profileCircle: {
@@ -1073,32 +895,36 @@ const styles = StyleSheet.create({
     borderRadius: 56,
     borderWidth: 3,
     borderColor: "#00A991",
-    backgroundColor: "#d9d9d9",
     marginTop: 20,
     alignSelf: "center",
-    justifyContent: "center",
-    alignItems: "center",
     position: "relative",
-    marginBottom: 8,
+    marginBottom: 20,
+    // overflow: "hidden", // Penting untuk memastikan gambar tidak keluar dari lingkaran
   },
-
+  profileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 56,
+  },
   difableContainer: {
     position: "absolute",
-    bottom: -10,
+    alignSelf: "center",
+    bottom: -12,
     backgroundColor: "#00A991",
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    minWidth: 80,
-    alignItems: "center",
-    alignSelf: "center",
+    zIndex: 10,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-
   difableText: {
-    color: "#FBFFE4",
-    fontWeight: "600",
+    fontWeight: 600,
     fontSize: 14,
-    textAlign: "center",
+    color: "#fbffe4",
   },
 
   containerNameFollow: {
@@ -1129,8 +955,8 @@ const styles = StyleSheet.create({
   },
 
   followText: {
-    height: 36,
-    width: 60,
+    // height: 36,
+    // width: 60,
     fontSize: 12,
     color: "#262626",
     alignItems: "center",
@@ -1164,6 +990,12 @@ const styles = StyleSheet.create({
 
     backgroundColor: "#00A991",
     borderRadius: 18,
+
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 
   leftGroup: {
@@ -1274,6 +1106,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     width: "100%",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 
   cardHeader: {
@@ -1320,9 +1157,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 16,
     alignItems: "center",
-    marginBottom: 16, // Beri jarak dengan card di bawahnya
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: "rgba(251, 255, 228, 0.2)",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 
   addButtonText: {
@@ -1339,10 +1181,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
 
-    // --- TAMBAHKAN 3 BARIS INI UNTUK MEMPERBAIKI LAYOUT ---
-    flexDirection: "row", // 1. Atur elemen menjadi horizontal
-    justifyContent: "space-between", // 2. Dorong elemen ke ujung-ujung
-    alignItems: "center", // 3. Sejajarkan secara vertikal di tengah
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   skillItemText: {
     color: "#FBFFE4",
@@ -1386,14 +1227,14 @@ const styles = StyleSheet.create({
   modalButton: {
     flex: 1, // PENTING: Membuat setiap tombol mengambil porsi ruang yang sama
     borderRadius: 20,
-    paddingVertical: 12,
+    paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
   },
   modalButtonText: {
     color: "#FBFFE4",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
   },
 
   sectionContainer: {},
@@ -1402,9 +1243,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FBFFE4", // Sesuaikan dengan warna background halaman Anda
+    backgroundColor: "#FBFFE4",
   },
-
   modalButtonContainer: {
     flexDirection: "row",
     width: "100%",
@@ -1466,13 +1306,37 @@ const styles = StyleSheet.create({
   },
 
   desktopCategoryContainer: {
-    flexDirection: "row", // Membuat item di dalamnya berjejer horizontal
-    width: "100%", // Memastikan container memakai lebar penuh
+    flexDirection: "row",
+    width: "100%",
     marginBottom: 16,
-    gap: 10, // Alternatif modern untuk marginRight, jika tidak ingin pakai gap, hapus ini
+    gap: 10,
   },
   desktopCategoryButton: {
-    flex: 1, // KUNCI UTAMA: membuat setiap tombol memanjang mengisi ruang yg tersedia
-    marginRight: 0, // Jika pakai 'gap', nonaktifkan marginRight agar jarak rata sempurna
+    flex: 1,
+    marginRight: 0,
+  },
+
+  container: {
+    flex: 1,
+  },
+
+  editButtonContainer: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "white",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 });

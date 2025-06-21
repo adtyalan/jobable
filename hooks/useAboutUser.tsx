@@ -51,5 +51,26 @@ export const useAboutUser = (userId: string | undefined) => {
     fetchAboutData();
   }, [userId]);
 
-  return { aboutData, setAboutData, loading };
+  const updateAboutList = async (
+    listName: "aksesibilitas" | "preferensi_kerja" | "keterampilan_khusus",
+    newList: string[]
+  ) => {
+    if (!userId) throw new Error("User ID not available");
+
+    const dataToUpdate = { [listName]: newList };
+
+    const { data, error } = await supabase
+      .from("about_user")
+      .update(dataToUpdate)
+      .eq("user_id", userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (data) setAboutData(data); // Langsung update seluruh objek
+    return data;
+  };
+
+  // Kita tidak mengembalikan setAboutData lagi, tapi fungsi yang lebih spesifik
+  return { aboutData, loading, updateAboutList };
 };

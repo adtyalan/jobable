@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const ApplicationForm = () => {
@@ -20,14 +20,13 @@ const ApplicationForm = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={{ padding: 16 }}>
-       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity>
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Ajukan Lamaran</Text>
-      </View>
-
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Ajukan Lamaran</Text>
+        </View>
 
         {/* Job Info */}
         <View style={styles.jobCard}>
@@ -36,7 +35,9 @@ const ApplicationForm = () => {
           </View>
           <View>
             <Text style={styles.jobTitle}>Web Developer</Text>
-            <Text style={styles.companyInfo}>PT Telkom Indonesia • Surabaya, Jawa Timur</Text>
+            <Text style={styles.companyInfo}>
+              PT Telkom Indonesia • Surabaya, Jawa Timur
+            </Text>
             <TouchableOpacity>
               <Text style={styles.detailLink}>Lihat detail pekerjaan</Text>
             </TouchableOpacity>
@@ -82,7 +83,7 @@ const ApplicationForm = () => {
         <Text style={styles.label}>Alamat Email</Text>
         <TextInput
           style={[styles.input, { borderColor: "#737373" }]}
-          placeholder="Contoh: kamu@email.com" 
+          placeholder="Contoh: kamu@email.com"
           placeholderTextColor="#999"
           value={email}
           onChangeText={setEmail}
@@ -133,15 +134,15 @@ export default ApplicationForm;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFBEA",
+    backgroundColor: "#FBFFE4",
   },
   headerRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 12,
-  marginTop: 12,
-  marginBottom: 16,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 12,
+    marginBottom: 16,
+  },
   title: {
     fontSize: 20,
     fontWeight: "bold",
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFE4",
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,

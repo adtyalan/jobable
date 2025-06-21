@@ -1,5 +1,11 @@
 import { Session, User } from "@supabase/supabase-js";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { supabase } from "../utils/supabase";
 
 // Definisikan tipe untuk profil
@@ -7,9 +13,12 @@ export type UserProfile = {
   id: string;
   full_name: string;
   role: "job_seeker" | "recruiter" | "admin";
-  // Tambahkan kolom lain dari tabel 'users' Anda di sini
   username?: string;
-  avatar_url?: string;
+  avatar?: string;
+  job_seeker_users: {
+    disability: string;
+    biography: string;
+  }[];
 };
 
 // Definisikan tipe untuk context
@@ -18,6 +27,7 @@ type ProfileContextType = {
   profile: UserProfile | null;
   session: Session | null;
   loading: boolean;
+  fetchProfile: () => Promise<void>;
 };
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -32,45 +42,46 @@ export const ProfileProvider = ({
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSessionAndProfile = async () => {
-      setLoading(true);
-      // 1. Ambil sesi (termasuk user auth)
+  const fetchSessionAndProfile = useCallback(async () => {
+    setLoading(true);
+    try {
       const {
         data: { session },
-        error: sessionError,
       } = await supabase.auth.getSession();
+
       if (session) {
         setSession(session);
         setUser(session.user);
 
-        // 2. Jika ada user, ambil profil dari tabel public.users
         const { data: userProfile, error: profileError } = await supabase
           .from("users")
-          .select("*")
+          .select(`*, job_seeker_users (disability, biography)`)
           .eq("id", session.user.id)
           .single();
 
         if (profileError) {
-          console.error("Error fetching profile:", profileError.message);
-        } else {
-          setProfile(userProfile);
+          throw profileError;
         }
+        setProfile(userProfile as UserProfile);
       }
+    } catch (error) {
+      console.error("Error fetching profile:", (error as Error).message);
+      setProfile(null); // Reset profile jika ada error
+    } finally {
       setLoading(false);
-    };
-
+    }
+  }, []);
+  useEffect(() => {
     fetchSessionAndProfile();
 
-    // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (!session) {
-          setProfile(null); // Clear profile on logout
+          setProfile(null);
         } else {
-          fetchSessionAndProfile(); // Refetch on login
+          fetchSessionAndProfile();
         }
       }
     );
@@ -85,6 +96,7 @@ export const ProfileProvider = ({
     user,
     profile,
     loading,
+    fetchProfile: fetchSessionAndProfile,
   };
 
   return (
