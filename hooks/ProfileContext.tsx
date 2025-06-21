@@ -1,12 +1,12 @@
-import { Session, User } from "@supabase/supabase-js";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../utils/supabase";
+import { Session, User } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '../utils/supabase';
 
 // Definisikan tipe untuk profil
 export type UserProfile = {
   id: string;
   full_name: string;
-  role: "job_seeker" | "recruiter" | "admin";
+  role: 'job_seeker' | 'recruiter' | 'admin';
   // Tambahkan kolom lain dari tabel 'users' Anda di sini
   username?: string;
   avatar_url?: string;
@@ -22,11 +22,7 @@ type ProfileContextType = {
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
-export const ProfileProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const ProfileProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -46,13 +42,13 @@ export const ProfileProvider = ({
 
         // 2. Jika ada user, ambil profil dari tabel public.users
         const { data: userProfile, error: profileError } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", session.user.id)
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
           .single();
 
         if (profileError) {
-          console.error("Error fetching profile:", profileError.message);
+          console.error('Error fetching profile:', profileError.message);
         } else {
           setProfile(userProfile);
         }
@@ -63,17 +59,15 @@ export const ProfileProvider = ({
     fetchSessionAndProfile();
 
     // Listen for auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (!session) {
-          setProfile(null); // Clear profile on logout
-        } else {
-          fetchSessionAndProfile(); // Refetch on login
-        }
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        setProfile(null); // Clear profile on logout
+      } else {
+        fetchSessionAndProfile(); // Refetch on login
       }
-    );
+    });
 
     return () => {
       authListener.subscription.unsubscribe();
@@ -87,16 +81,14 @@ export const ProfileProvider = ({
     loading,
   };
 
-  return (
-    <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>
-  );
+  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 };
 
 // Hook custom untuk menggunakan context
 export const useUserProfile = () => {
   const context = useContext(ProfileContext);
   if (context === undefined) {
-    throw new Error("useUserProfile must be used within a ProfileProvider");
+    throw new Error('useUserProfile must be used within a ProfileProvider');
   }
   return context;
 };

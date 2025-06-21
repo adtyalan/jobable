@@ -1,7 +1,7 @@
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useEffect, useState } from "react";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -17,17 +17,14 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../utils/supabase";
+} from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '../../utils/supabase';
 
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const showAlertLogin = () => {
-  Alert.alert(
-    "Akses dibatasi",
-    "Silakan login dahulu untuk menggunakan fitur ini."
-  );
+  Alert.alert('Akses dibatasi', 'Silakan login dahulu untuk menggunakan fitur ini.');
 };
 
 type Post = {
@@ -56,7 +53,7 @@ export default function Comunity() {
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  const [newComment, setNewComment] = useState(""); // State untuk teks input
+  const [newComment, setNewComment] = useState(''); // State untuk teks input
   const [isSubmittingComment, setIsSubmittingComment] = useState(false); // State loading saat kirim
 
   // Untuk animasi slide down
@@ -76,7 +73,7 @@ export default function Comunity() {
 
   async function fetchPosts() {
     const { data, error } = await supabase
-      .from("forum_posts")
+      .from('forum_posts')
       .select(
         `
       id, title, content, created_at,
@@ -84,9 +81,9 @@ export default function Comunity() {
       forum_likes(id, user_id),
       forum_comments(id),
       forum_saves(id, user_id)
-    `
+    `,
       )
-      .order("created_at", { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (!error && data) {
       setPosts(data);
@@ -95,17 +92,13 @@ export default function Comunity() {
       if (userId) {
         setLikedPosts(
           data
-            .filter((post) =>
-              post.forum_likes.some((like) => like.user_id === userId)
-            )
-            .map((post) => post.id)
+            .filter((post) => post.forum_likes.some((like) => like.user_id === userId))
+            .map((post) => post.id),
         );
         setSavedPosts(
           data
-            .filter((post) =>
-              post.forum_saves.some((save) => save.user_id === userId)
-            )
-            .map((post) => post.id)
+            .filter((post) => post.forum_saves.some((save) => save.user_id === userId))
+            .map((post) => post.id),
         );
       }
     }
@@ -116,10 +109,10 @@ export default function Comunity() {
   const fetchComments = async (postId: string) => {
     setLoadingComments(true);
     const { data, error } = await supabase
-      .from("forum_comments")
-      .select("id, content, created_at, users(full_name)")
-      .eq("post_id", postId)
-      .order("created_at", { ascending: true });
+      .from('forum_comments')
+      .select('id, content, created_at, users(full_name)')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true });
     if (!error) setComments(data);
     setLoadingComments(false);
   };
@@ -136,10 +129,10 @@ export default function Comunity() {
     if (alreadyLiked) {
       // Unlike
       const { error } = await supabase
-        .from("forum_likes")
+        .from('forum_likes')
         .delete()
-        .eq("post_id", post.id)
-        .eq("user_id", userId);
+        .eq('post_id', post.id)
+        .eq('user_id', userId);
       if (!error) {
         setLikedPosts(likedPosts.filter((id) => id !== post.id));
         setPosts((posts) =>
@@ -147,29 +140,25 @@ export default function Comunity() {
             p.id === post.id
               ? {
                   ...p,
-                  forum_likes: p.forum_likes.filter(
-                    (l) => l.user_id !== userId
-                  ),
+                  forum_likes: p.forum_likes.filter((l) => l.user_id !== userId),
                 }
-              : p
-          )
+              : p,
+          ),
         );
       }
     } else {
       // Like
       const { data, error } = await supabase
-        .from("forum_likes")
+        .from('forum_likes')
         .insert({ post_id: post.id, user_id: userId })
-        .select("id, user_id")
+        .select('id, user_id')
         .single();
       if (!error && data) {
         setLikedPosts([...likedPosts, post.id]);
         setPosts((posts) =>
           posts.map((p) =>
-            p.id === post.id
-              ? { ...p, forum_likes: [...p.forum_likes, data] }
-              : p
-          )
+            p.id === post.id ? { ...p, forum_likes: [...p.forum_likes, data] } : p,
+          ),
         );
       }
     }
@@ -185,10 +174,10 @@ export default function Comunity() {
     if (alreadySaved) {
       // Unsave
       const { error } = await supabase
-        .from("forum_saves")
+        .from('forum_saves')
         .delete()
-        .eq("post_id", post.id)
-        .eq("user_id", userId);
+        .eq('post_id', post.id)
+        .eq('user_id', userId);
       if (!error) {
         setSavedPosts(savedPosts.filter((id) => id !== post.id));
         setPosts((posts) =>
@@ -196,29 +185,25 @@ export default function Comunity() {
             p.id === post.id
               ? {
                   ...p,
-                  forum_saves: p.forum_saves.filter(
-                    (s) => s.user_id !== userId
-                  ),
+                  forum_saves: p.forum_saves.filter((s) => s.user_id !== userId),
                 }
-              : p
-          )
+              : p,
+          ),
         );
       }
     } else {
       // Save
       const { data, error } = await supabase
-        .from("forum_saves")
+        .from('forum_saves')
         .insert({ post_id: post.id, user_id: userId })
-        .select("id, user_id")
+        .select('id, user_id')
         .single();
       if (!error && data) {
         setSavedPosts([...savedPosts, post.id]);
         setPosts((posts) =>
           posts.map((p) =>
-            p.id === post.id
-              ? { ...p, forum_saves: [...p.forum_saves, data] }
-              : p
-          )
+            p.id === post.id ? { ...p, forum_saves: [...p.forum_saves, data] } : p,
+          ),
         );
       }
     }
@@ -239,7 +224,7 @@ export default function Comunity() {
       data: { session },
     } = await supabase.auth.getSession();
     if (!session) {
-      console.error("No user session found");
+      console.error('No user session found');
       setIsSubmittingComment(false);
       return;
     }
@@ -254,17 +239,17 @@ export default function Comunity() {
 
     // 3. Insert ke Supabase
     const { data, error } = await supabase
-      .from("forum_comments")
+      .from('forum_comments')
       .insert(commentToInsert)
-      .select("*, users(full_name)") // Ambil kembali data lengkap setelah insert
+      .select('*, users(full_name)') // Ambil kembali data lengkap setelah insert
       .single();
 
     if (error) {
-      console.error("Error adding comment:", error.message);
+      console.error('Error adding comment:', error.message);
     } else if (data) {
       // 4. Perbarui UI secara optimis (tambahkan komentar baru ke daftar)
       setComments((prevComments) => [...prevComments, data]);
-      setNewComment(""); // Kosongkan input
+      setNewComment(''); // Kosongkan input
     }
 
     setIsSubmittingComment(false);
@@ -332,21 +317,16 @@ export default function Comunity() {
           renderItem={({ item }) => (
             <View style={styles.postCard}>
               <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.author}>
-                oleh {item.users.full_name || "Anonim"}
-              </Text>
+              <Text style={styles.author}>oleh {item.users.full_name || 'Anonim'}</Text>
               <Text>{item.content}</Text>
 
               <View style={styles.metaBar}>
                 <View style={styles.likeCommentBar}>
-                  <TouchableOpacity
-                    style={styles.iconContainer}
-                    onPress={() => handleLike(item)}
-                  >
+                  <TouchableOpacity style={styles.iconContainer} onPress={() => handleLike(item)}>
                     <AntDesign
-                      name={likedPosts.includes(item.id) ? "like1" : "like2"}
+                      name={likedPosts.includes(item.id) ? 'like1' : 'like2'}
                       size={24}
-                      color={likedPosts.includes(item.id) ? "#00A991" : "black"}
+                      color={likedPosts.includes(item.id) ? '#00A991' : 'black'}
                     />
                     <Text>{item.forum_likes?.length || 0}</Text>
                   </TouchableOpacity>
@@ -354,26 +334,15 @@ export default function Comunity() {
                     style={styles.iconContainer}
                     onPress={() => openCommentModal(item)}
                   >
-                    <MaterialCommunityIcons
-                      name="comment-outline"
-                      size={24}
-                      color="black"
-                    />
+                    <MaterialCommunityIcons name="comment-outline" size={24} color="black" />
                     <Text>{item.forum_comments?.length || 0}</Text>
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  style={styles.iconContainer}
-                  onPress={() => handleSave(item)}
-                >
+                <TouchableOpacity style={styles.iconContainer} onPress={() => handleSave(item)}>
                   <Ionicons
-                    name={
-                      savedPosts.includes(item.id)
-                        ? "archive"
-                        : "archive-outline"
-                    }
+                    name={savedPosts.includes(item.id) ? 'archive' : 'archive-outline'}
                     size={24}
-                    color={savedPosts.includes(item.id) ? "#00A991" : "black"}
+                    color={savedPosts.includes(item.id) ? '#00A991' : 'black'}
                   />
                   <Text>{item.forum_saves?.length || 0}</Text>
                 </TouchableOpacity>
@@ -395,10 +364,7 @@ export default function Comunity() {
               <Text style={styles.modalTitle} numberOfLines={1}>
                 {selectedPost?.title}
               </Text>
-              <TouchableOpacity
-                onPress={closeCommentModal}
-                style={styles.closeIcon}
-              >
+              <TouchableOpacity onPress={closeCommentModal} style={styles.closeIcon}>
                 <Ionicons name="close" size={28} color="black" />
               </TouchableOpacity>
             </View>
@@ -411,9 +377,7 @@ export default function Comunity() {
               ListHeaderComponent={() => (
                 // Tampilkan loading atau pesan "belum ada komentar"
                 <>
-                  {loadingComments && (
-                    <ActivityIndicator style={{ marginVertical: 20 }} />
-                  )}
+                  {loadingComments && <ActivityIndicator style={{ marginVertical: 20 }} />}
                   {!loadingComments && comments.length === 0 && (
                     <Text style={styles.noCommentsText}>
                       Belum ada komentar. Jadilah yang pertama!
@@ -423,12 +387,10 @@ export default function Comunity() {
               )}
               renderItem={({ item }) => (
                 <View style={styles.commentCard}>
-                  <Text style={styles.commentAuthor}>
-                    {item.users?.full_name || "Anonim"}
-                  </Text>
+                  <Text style={styles.commentAuthor}>{item.users?.full_name || 'Anonim'}</Text>
                   <Text>{item.content}</Text>
                   <Text style={styles.commentDate}>
-                    {new Date(item.created_at).toLocaleString("id-ID")}
+                    {new Date(item.created_at).toLocaleString('id-ID')}
                   </Text>
                 </View>
               )}
@@ -436,8 +398,8 @@ export default function Comunity() {
 
             {/* Input Komentar (UI dari Bagian 1 tetap ada) */}
             <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
             >
               <View style={styles.commentInputContainer}>
                 <TextInput
@@ -471,64 +433,64 @@ const styles = StyleSheet.create({
   // ...existing styles...
   center: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   postCard: {
-    marginHorizontal: Platform.OS === "web" ? 30 : 30,
+    marginHorizontal: Platform.OS === 'web' ? 30 : 30,
     marginVertical: 8,
     padding: 16,
-    backgroundColor: "#f4f4f4",
+    backgroundColor: '#f4f4f4',
     borderRadius: 12,
     elevation: 1,
     borderWidth: 1,
-    borderColor: "#00A991",
+    borderColor: '#00A991',
   },
   title: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   author: {
     fontSize: 14,
-    color: "gray",
+    color: 'gray',
     marginBottom: 8,
   },
   metaBar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     marginTop: 12,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: "#ddd",
+    borderTopColor: '#ddd',
   },
   iconContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingTop: 10,
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 4,
   },
   likeCommentBar: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     flex: 1,
     gap: 20,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: 'white',
   },
   modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: '#eee',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     flex: 1, // Agar title tidak mendorong tombol close
   },
   closeIcon: {
@@ -539,74 +501,74 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   noCommentsText: {
-    textAlign: "center",
-    color: "#888",
+    textAlign: 'center',
+    color: '#888',
     marginTop: 40,
-    fontStyle: "italic",
+    fontStyle: 'italic',
   },
   commentCard: {
     padding: 12,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: '#f9f9f9',
     borderRadius: 8,
     marginVertical: 6,
   },
   commentAuthor: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 4,
   },
   commentDate: {
     fontSize: 10,
-    color: "#aaa",
+    color: '#aaa',
     marginTop: 8,
-    textAlign: "right",
+    textAlign: 'right',
   },
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     minHeight: 300,
-    maxHeight: "80%",
+    maxHeight: '80%',
     padding: 24,
     paddingBottom: 40,
   },
   modalHandle: {
     width: 40,
     height: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
     borderRadius: 3,
-    alignSelf: "center",
+    alignSelf: 'center',
     marginBottom: 12,
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 16,
-    textAlign: "center",
+    textAlign: 'center',
   },
   closeButton: {
-    backgroundColor: "#00A991",
+    backgroundColor: '#00A991',
     padding: 12,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 16,
   },
   commentInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: "#eee",
+    borderTopColor: '#eee',
     padding: 8,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   commentInput: {
     flex: 1,
-    backgroundColor: "#f0f2f5",
+    backgroundColor: '#f0f2f5',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -614,11 +576,11 @@ const styles = StyleSheet.create({
     maxHeight: 100,
   },
   sendButton: {
-    backgroundColor: "#00A991",
+    backgroundColor: '#00A991',
     borderRadius: 25,
     width: 40,
     height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

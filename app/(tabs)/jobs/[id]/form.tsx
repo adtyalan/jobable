@@ -1,8 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
-import * as DocumentPicker from "expo-document-picker";
-import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -13,15 +13,15 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../utils/supabase";
+} from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '../../../../utils/supabase';
 
 const ApplicationForm = () => {
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -46,9 +46,9 @@ const ApplicationForm = () => {
     async function fetchJob() {
       setLoading(true);
       const { data, error } = await supabase
-        .from("jobs")
-        .select("*, companies(*)")
-        .eq("id", id)
+        .from('jobs')
+        .select('*, companies(*)')
+        .eq('id', id)
         .single();
       if (!error) setJob(data);
       setLoading(false);
@@ -70,9 +70,9 @@ const ApplicationForm = () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: [
-          "application/pdf",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ],
         copyToCacheDirectory: true,
       });
@@ -80,12 +80,12 @@ const ApplicationForm = () => {
       // Ganti pemeriksaan dari 'result.type === "success"' menjadi '!result.canceled'
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setResume(result.assets[0]);
-        console.log("Resume terpilih:", result.assets[0]);
+        console.log('Resume terpilih:', result.assets[0]);
       } else {
-        console.log("Pemilihan file dibatalkan atau gagal.");
+        console.log('Pemilihan file dibatalkan atau gagal.');
       }
     } catch (error) {
-      console.error("Terjadi error saat memilih dokumen:", error);
+      console.error('Terjadi error saat memilih dokumen:', error);
       // Anda bisa menampilkan pesan error kepada pengguna di sini jika perlu
     }
   };
@@ -93,15 +93,15 @@ const ApplicationForm = () => {
   // Form validation
   function validate() {
     if (!name.trim() || !address.trim() || !phone.trim() || !email.trim()) {
-      setError("Semua field wajib diisi.");
+      setError('Semua field wajib diisi.');
       return false;
     }
     if (!/^[0-9]+$/.test(phone)) {
-      setError("Nomor telepon hanya boleh angka.");
+      setError('Nomor telepon hanya boleh angka.');
       return false;
     }
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
-      setError("Format email tidak valid.");
+      setError('Format email tidak valid.');
       return false;
     }
     setError(null);
@@ -117,7 +117,7 @@ const ApplicationForm = () => {
     // 0. Validasi awal
     if (!validate()) return;
     if (!resume) {
-      setError("Resume wajib diunggah.");
+      setError('Resume wajib diunggah.');
       return;
     }
 
@@ -126,7 +126,7 @@ const ApplicationForm = () => {
     try {
       // 1. Persiapkan file untuk diunggah
       // Menggunakan ekstensi file asli dari nama file
-      const fileExt = resume.name.split(".").pop();
+      const fileExt = resume.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `private/${fileName}`; // Folder 'private' di dalam bucket 'resumes'
 
@@ -137,7 +137,7 @@ const ApplicationForm = () => {
 
       // 2. Unggah file ke Supabase Storage
       const { data, error: uploadError } = await supabase.storage
-        .from("resumes") // Nama bucket yang Anda buat
+        .from('resumes') // Nama bucket yang Anda buat
         .upload(filePath, blob, {
           contentType: resume.mimeType,
           upsert: false,
@@ -148,50 +148,46 @@ const ApplicationForm = () => {
       }
 
       // 3. Dapatkan URL publik dari file yang diunggah
-      const { data: urlData } = supabase.storage
-        .from("resumes")
-        .getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.from('resumes').getPublicUrl(filePath);
 
       if (!urlData || !urlData.publicUrl) {
-        throw new Error("Gagal mendapatkan URL publik untuk resume.");
+        throw new Error('Gagal mendapatkan URL publik untuk resume.');
       }
       const resumeUrl = urlData.publicUrl;
 
       // 4. Simpan semua data (termasuk URL resume) ke tabel 'applications'
-      const { error: insertError } = await supabase
-        .from("applications")
-        .insert([
-          {
-            job_id: job?.id,
-            user_id: user?.id,
-            name,
-            address,
-            phone,
-            email,
-            cv_url: resumeUrl, // <-- Simpan URL di sini
-            status: "pending",
-          },
-        ]);
+      const { error: insertError } = await supabase.from('applications').insert([
+        {
+          job_id: job?.id,
+          user_id: user?.id,
+          name,
+          address,
+          phone,
+          email,
+          cv_url: resumeUrl, // <-- Simpan URL di sini
+          status: 'pending',
+        },
+      ]);
 
       if (insertError) {
         throw new Error(`Gagal mengirim lamaran: ${insertError.message}`);
       }
 
       // 5. Reset form jika berhasil
-      setSuccess("Lamaran berhasil dikirim!");
-      setName("");
-      setAddress("");
-      setPhone("");
-      setEmail("");
+      setSuccess('Lamaran berhasil dikirim!');
+      setName('');
+      setAddress('');
+      setPhone('');
+      setEmail('');
       setResume(null); // Jangan lupa reset state resume
       setError(null);
 
       setTimeout(() => {
-        router.replace("/"); // Kembali ke halaman utama setelah submit
+        router.replace('/'); // Kembali ke halaman utama setelah submit
       }, 1500);
     } catch (err: any) {
       // Tangkap semua jenis error (upload, get URL, insert)
-      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
+      setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       // Pastikan loading state selalu kembali ke false
       setIsSubmitting(false);
@@ -203,7 +199,7 @@ const ApplicationForm = () => {
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView
             contentContainerStyle={{
@@ -236,13 +232,11 @@ const ApplicationForm = () => {
                 )}
               </View>
               <View>
-                <Text style={styles.jobTitle}>{job?.title || "-"}</Text>
+                <Text style={styles.jobTitle}>{job?.title || '-'}</Text>
                 <Text style={styles.companyInfo}>
-                  {job?.companies?.company_name || "-"} • {job?.location || "-"}
+                  {job?.companies?.company_name || '-'} • {job?.location || '-'}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => router.push(`/jobs/${job?.id}`)}
-                >
+                <TouchableOpacity onPress={() => router.push(`/jobs/${job?.id}`)}>
                   <Text style={styles.detailLink}>Lihat detail pekerjaan</Text>
                 </TouchableOpacity>
               </View>
@@ -251,7 +245,7 @@ const ApplicationForm = () => {
             {/* Form */}
             <Text style={styles.label}>Nama</Text>
             <TextInput
-              style={[styles.input, { borderColor: "#737373" }]}
+              style={[styles.input, { borderColor: '#737373' }]}
               placeholderTextColor="#999"
               placeholder="Contoh: Muhammad Abyan Aditya"
               value={name}
@@ -260,7 +254,7 @@ const ApplicationForm = () => {
 
             <Text style={styles.label}>Alamat Rumah</Text>
             <TextInput
-              style={[styles.input, { borderColor: "#737373" }]}
+              style={[styles.input, { borderColor: '#737373' }]}
               placeholder="Contoh: Sekaran, Gunungpati, Semarang"
               placeholderTextColor="#999"
               value={address}
@@ -270,12 +264,12 @@ const ApplicationForm = () => {
             <Text style={styles.label}>Nomor Telepon</Text>
             <View style={styles.phoneRow}>
               <TextInput
-                style={[styles.codeInput, { borderColor: "#737373" }]}
+                style={[styles.codeInput, { borderColor: '#737373' }]}
                 value="+62"
                 editable={false}
               />
               <TextInput
-                style={[styles.phoneInput, { borderColor: "#737373" }]}
+                style={[styles.phoneInput, { borderColor: '#737373' }]}
                 placeholder="Contoh: 81575624991"
                 placeholderTextColor="#999"
                 value={phone}
@@ -286,7 +280,7 @@ const ApplicationForm = () => {
 
             <Text style={styles.label}>Alamat Email</Text>
             <TextInput
-              style={[styles.input, { borderColor: "#737373" }]}
+              style={[styles.input, { borderColor: '#737373' }]}
               placeholder="Contoh: kamu@email.com"
               placeholderTextColor="#999"
               value={email}
@@ -300,58 +294,44 @@ const ApplicationForm = () => {
               style={[
                 styles.uploadButton,
                 resume && {
-                  backgroundColor: "#00B388",
-                  borderColor: "#00B388",
+                  backgroundColor: '#00B388',
+                  borderColor: '#00B388',
                 },
               ]}
               onPress={pickResume}
             >
               <Ionicons
-                name={resume ? "checkmark-circle" : "cloud-upload-outline"}
+                name={resume ? 'checkmark-circle' : 'cloud-upload-outline'}
                 size={18}
-                color={resume ? "#fff" : "#00B388"}
+                color={resume ? '#fff' : '#00B388'}
                 style={{ marginRight: 8 }}
               />
-              <Text
-                style={[
-                  styles.uploadText,
-                  resume && { color: "#fff", fontWeight: "bold" },
-                ]}
-              >
-                {resume ? "File Terunggah" : "Unggah"}
+              <Text style={[styles.uploadText, resume && { color: '#fff', fontWeight: 'bold' }]}>
+                {resume ? 'File Terunggah' : 'Unggah'}
               </Text>
             </TouchableOpacity>
             {resume && (
-              <Text style={{ fontSize: 12, color: "#00B388", marginTop: 4 }}>
-                {resume.name}
-              </Text>
+              <Text style={{ fontSize: 12, color: '#00B388', marginTop: 4 }}>{resume.name}</Text>
             )}
 
             <Text style={styles.footerNote}>
-              Jaga diri Anda. Jangan sertakan informasi sensitif dalam dokumen
-              anda.
+              Jaga diri Anda. Jangan sertakan informasi sensitif dalam dokumen anda.
             </Text>
 
-            {error && (
-              <Text style={{ color: "red", marginTop: 16 }}>{error}</Text>
-            )}
-            {success && (
-              <Text style={{ color: "green", marginTop: 16 }}>{success}</Text>
-            )}
+            {error && <Text style={{ color: 'red', marginTop: 16 }}>{error}</Text>}
+            {success && <Text style={{ color: 'green', marginTop: 16 }}>{success}</Text>}
           </ScrollView>
 
           {/* Submit Button */}
           <TouchableOpacity
             style={[
               styles.submitButton,
-              isSubmitting && { backgroundColor: "#999" }, // Warna abu-abu saat loading
+              isSubmitting && { backgroundColor: '#999' }, // Warna abu-abu saat loading
             ]}
             onPress={handleSubmit}
             disabled={isSubmitting} // Nonaktifkan tombol saat loading
           >
-            <Text style={styles.submitText}>
-              {isSubmitting ? "Mengirim..." : "Ajukan"}
-            </Text>
+            <Text style={styles.submitText}>{isSubmitting ? 'Mengirim...' : 'Ajukan'}</Text>
           </TouchableOpacity>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -368,115 +348,115 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
     marginBottom: 16,
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   jobCard: {
-    flexDirection: "row",
-    backgroundColor: "#f5f5f5",
+    flexDirection: 'row',
+    backgroundColor: '#f5f5f5',
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
-    alignItems: "center",
+    alignItems: 'center',
     gap: 12,
   },
   logo: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 30,
     width: 60,
     height: 60,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoIcon: {
     fontSize: 28,
   },
   jobTitle: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 16,
   },
   companyInfo: {
     fontSize: 12,
-    color: "#666",
+    color: '#666',
   },
   detailLink: {
     fontSize: 12,
-    color: "#00B388",
+    color: '#00B388',
     marginTop: 4,
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
     marginTop: 16,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
     marginTop: 6,
   },
   phoneRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 8,
     marginTop: 6,
   },
   codeInput: {
     width: 60,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
   },
   phoneInput: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
   },
   uploadButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: "#00B388",
+    borderColor: '#00B388',
     padding: 10,
     borderRadius: 8,
     marginTop: 6,
-    width: "100%",
+    width: '100%',
   },
   uploadText: {
     marginLeft: 6,
-    color: "#00B388",
-    fontWeight: "600",
+    color: '#00B388',
+    fontWeight: '600',
   },
   footerNote: {
     marginTop: 30,
     fontSize: 16,
-    color: "#666",
+    color: '#666',
   },
   submitButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#00B388",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#00B388',
     padding: 16,
     borderRadius: 12,
-    justifyContent: "center",
+    justifyContent: 'center',
     gap: 8,
     marginHorizontal: 16,
   },
   submitText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: '#fff',
+    fontWeight: '600',
     fontSize: 16,
   },
 });

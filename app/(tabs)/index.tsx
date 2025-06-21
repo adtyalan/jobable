@@ -1,6 +1,6 @@
-import { useUserProfile } from "@/hooks/ProfileContext";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useUserProfile } from '@/hooks/ProfileContext';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -10,17 +10,17 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import "react-native-url-polyfill/auto";
-import { supabase } from "../../utils/supabase";
+} from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import 'react-native-url-polyfill/auto';
+import { supabase } from '../../utils/supabase';
 
 const categories = [
-  { label: "Semua", value: null },
-  { label: "Tunarungu", value: "tunarungu" },
-  { label: "Tunanetra", value: "tunanetra" },
-  { label: "Tunawicara", value: "tunawicara" },
-  { label: "Tunadaksa", value: "tunadaksa" },
+  { label: 'Semua', value: null },
+  { label: 'Tunarungu', value: 'tunarungu' },
+  { label: 'Tunanetra', value: 'tunanetra' },
+  { label: 'Tunawicara', value: 'tunawicara' },
+  { label: 'Tunadaksa', value: 'tunadaksa' },
 ];
 
 const Index = () => {
@@ -31,10 +31,10 @@ const Index = () => {
 
   function getGreeting() {
     const hour = new Date().getHours();
-    if (hour >= 4 && hour < 12) return "Selamat pagi";
-    if (hour >= 12 && hour < 18) return "Selamat siang";
-    if (hour >= 18 && hour < 22) return "Selamat malam";
-    return "Selamat malam";
+    if (hour >= 4 && hour < 12) return 'Selamat pagi';
+    if (hour >= 12 && hour < 18) return 'Selamat siang';
+    if (hour >= 18 && hour < 22) return 'Selamat malam';
+    return 'Selamat malam';
   }
 
   useEffect(() => {
@@ -44,9 +44,9 @@ const Index = () => {
   // ...existing code...
   async function fetchJobs(category: string | null) {
     setLoading(true);
-    let query = supabase.from("jobs").select("*, companies(*)"); // <-- perbaiki di sini
+    let query = supabase.from('jobs').select('*, companies(*)'); // <-- perbaiki di sini
     if (category) {
-      query = query.eq("category", category);
+      query = query.eq('category', category);
     }
     const { data, error } = await query;
     if (error) {
@@ -63,14 +63,12 @@ const Index = () => {
     <SafeAreaProvider>
       <ScrollView style={styles.container}>
         <Text style={styles.heading}>
-          {profile?.full_name
-            ? `Selamat datang, ${profile.full_name}!`
-            : `${getGreeting()}!`}
+          {profile?.full_name ? `Selamat datang, ${profile.full_name}!` : `${getGreeting()}!`}
         </Text>
         <Text style={styles.subheading}>
           {profile?.full_name
-            ? "Semoga harimu menyenangkan."
-            : "Silakan login untuk pengalaman lebih baik."}
+            ? 'Semoga harimu menyenangkan.'
+            : 'Silakan login untuk pengalaman lebih baik.'}
         </Text>
 
         <Text style={styles.kategoriTitle}>Kategori</Text>
@@ -84,21 +82,17 @@ const Index = () => {
               <TouchableOpacity
                 key={item.label}
                 onPress={() =>
-                  setSelectedCategory(
-                    selectedCategory === item.value ? null : item.value
-                  )
+                  setSelectedCategory(selectedCategory === item.value ? null : item.value)
                 }
                 style={[
                   styles.categoryButton,
-                  selectedCategory === item.value &&
-                    styles.categoryButtonSelected,
+                  selectedCategory === item.value && styles.categoryButtonSelected,
                 ]}
               >
                 <Text
                   style={[
                     styles.categoryText,
-                    selectedCategory === item.value &&
-                      styles.categoryTextSelected,
+                    selectedCategory === item.value && styles.categoryTextSelected,
                   ]}
                   numberOfLines={1}
                   adjustsFontSizeToFit
@@ -121,16 +115,12 @@ const Index = () => {
             data={jobs}
             keyExtractor={(item) => item.id.toString()}
             numColumns={2}
-            columnWrapperStyle={{ justifyContent: "space-between" }}
+            columnWrapperStyle={{ justifyContent: 'space-between' }}
             renderItem={({ item }) => (
-              <Pressable
-                style={styles.jobCard}
-                onPress={() => router.push(`/jobs/${item.id}`)}
-              >
+              <Pressable style={styles.jobCard} onPress={() => router.push(`/jobs/${item.id}`)}>
                 <Image
                   source={{
-                    uri:
-                      item.companies?.logo || "https://via.placeholder.com/150",
+                    uri: item.companies?.logo || 'https://via.placeholder.com/150',
                   }}
                   style={styles.jobLogo}
                   resizeMode="cover"
@@ -172,33 +162,33 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   subheading: {
     fontSize: 18,
-    fontWeight: "500",
+    fontWeight: '500',
     marginBottom: 10,
   },
   kategoriTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 28,
     marginBottom: 10,
   },
   rekomendasiTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 10,
     marginBottom: 10,
   },
   categoryWrapper: {
     marginBottom: 10,
     paddingVertical: 4,
-    overflow: "visible",
+    overflow: 'visible',
   },
   categoryScrollContent: {
     paddingHorizontal: 2,
-    overflow: "visible",
+    overflow: 'visible',
   },
   categoryButton: {
     paddingHorizontal: 16,
@@ -208,73 +198,73 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
     borderWidth: 1,
-    borderColor: "#10B981",
+    borderColor: '#10B981',
     marginRight: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     zIndex: 1,
   },
   categoryButtonSelected: {
-    backgroundColor: "#10B981",
+    backgroundColor: '#10B981',
     zIndex: 2,
   },
   categoryText: {
     fontSize: 14,
-    fontWeight: "500",
-    color: "#10B981",
+    fontWeight: '500',
+    color: '#10B981',
   },
   categoryTextSelected: {
-    color: "#ffffff",
+    color: '#ffffff',
   },
   jobCard: {
     padding: 12,
     borderWidth: 1,
-    borderColor: "#14B8A6",
+    borderColor: '#14B8A6',
     borderRadius: 12,
     marginBottom: 16,
-    width: "48%",
+    width: '48%',
   },
   jobTitle: {
     fontSize: 15,
-    fontWeight: "bold",
-    color: "black",
+    fontWeight: 'bold',
+    color: 'black',
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 4,
   },
   jobLogo: {
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     marginTop: 6,
     marginBottom: 4,
   },
   jobCompany: {
     fontSize: 12,
-    color: "black",
+    color: 'black',
   },
   jobLocation: {
     fontSize: 12,
-    color: "#262626",
+    color: '#262626',
   },
   jobType: {
     fontSize: 12,
-    color: "black",
+    color: 'black',
   },
   jobSalary: {
     fontSize: 12,
-    color: "black",
+    color: 'black',
   },
   jobCategory: {
     fontSize: 12,
-    color: "black",
-    fontStyle: "italic",
+    color: 'black',
+    fontStyle: 'italic',
   },
   jobUrgent: {
     marginTop: 4,
-    color: "#262626",
+    color: '#262626',
     fontSize: 12,
   },
 });

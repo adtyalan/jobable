@@ -1,6 +1,6 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Link, router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Link, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -9,9 +9,9 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../utils/supabase";
+} from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '../../../../utils/supabase';
 
 // Komponen Kustom untuk Section dan Bullet List
 const Section = ({ title, children }) => (
@@ -44,9 +44,9 @@ const JobDetail = () => {
     async function fetchJob() {
       setLoading(true);
       const { data, error } = await supabase
-        .from("jobs")
-        .select("*, companies(*)")
-        .eq("id", id)
+        .from('jobs')
+        .select('*, companies(*)')
+        .eq('id', id)
         .single();
       if (!error) setJob(data);
       setLoading(false);
@@ -67,7 +67,7 @@ const JobDetail = () => {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={styles.container}>
-          <Text style={{ textAlign: "center", marginTop: 40 }}>
+          <Text style={{ textAlign: 'center', marginTop: 40 }}>
             Data pekerjaan tidak ditemukan.
           </Text>
         </SafeAreaView>
@@ -78,7 +78,7 @@ const JobDetail = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <Link href={"/"} style={styles.backBtn}>
+        <Link href={'/'} style={styles.backBtn}>
           <Ionicons name="arrow-back-outline" size={30} color="black" />
         </Link>
         {/* Header Tetap */}
@@ -97,7 +97,7 @@ const JobDetail = () => {
             )}
             <View style={styles.headerContent}>
               <Text style={styles.company}>
-                {job.companies?.name || "-"} • {job.location}
+                {job.companies?.name || '-'} • {job.location}
               </Text>
               <Text style={styles.jobTitle}>{job.title}</Text>
               <View style={styles.tagContainer}>
@@ -110,26 +110,24 @@ const JobDetail = () => {
         {/* Konten Scrollable */}
         <ScrollView contentContainerStyle={styles.scrollSection}>
           <Section title="Deskripsi Pekerjaan">
-            <Text style={styles.paragraph}>
-              {job.description || "Tidak ada deskripsi."}
-            </Text>
+            <Text style={styles.paragraph}>{job.description || 'Tidak ada deskripsi.'}</Text>
           </Section>
 
           {job.responsibilities && (
             <Section title="Tanggung Jawab">
-              <BulletList items={job.responsibilities.split("\n")} />
+              <BulletList items={job.responsibilities.split('\n')} />
             </Section>
           )}
 
           {job.qualifications && (
             <Section title="Kualifikasi">
-              <BulletList items={job.qualifications.split("\n")} />
+              <BulletList items={job.qualifications.split('\n')} />
             </Section>
           )}
 
           {job.facilities && (
             <Section title="Fasilitas Perusahaan">
-              <BulletList items={job.facilities.split("\n")} />
+              <BulletList items={job.facilities.split('\n')} />
             </Section>
           )}
         </ScrollView>
@@ -139,22 +137,19 @@ const JobDetail = () => {
           <View style={styles.infoRowContainer}>
             <View style={styles.infoBox}>
               <MaterialIcons name="attach-money" size={22} color="#2E8B57" />
-              <Text style={styles.infoText}>
-                {job.salary ? `Rp ${job.salary}` : "-"}
-              </Text>
+              <Text style={styles.infoText}>{job.salary ? `Rp ${job.salary}` : '-'}</Text>
             </View>
             <View style={styles.infoBox}>
               <Ionicons name="briefcase-outline" size={22} color="#2E8B57" />
-              <Text style={styles.infoText}>{job.type || "-"}</Text>
+              <Text style={styles.infoText}>{job.type || '-'}</Text>
             </View>
           </View>
 
-          <Pressable
-            style={styles.button}
-            onPress={() => router.push(`/jobs/form?id=${job.id}`)} // <-- sertakan id
-          >
-            <Text style={styles.buttonText}>Ajukan Lamaran</Text>
-          </Pressable>
+          <Link href={`/jobs/${id}/form`} asChild>
+            <Pressable style={styles.button}>
+              <Text style={styles.buttonText}>Ajukan Lamaran</Text>
+            </Pressable>
+          </Link>
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -165,16 +160,16 @@ const JobDetail = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFBEA",
+    backgroundColor: '#FFFBEA',
   },
   headerCard: {
-    flexDirection: "row",
-    backgroundColor: "#00B388",
+    flexDirection: 'row',
+    backgroundColor: '#00B388',
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 20,
     marginTop: 12,
-    alignItems: "center",
+    alignItems: 'center',
   },
   scrollSection: {
     paddingTop: 20,
@@ -186,12 +181,12 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   logoCircle: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     width: 60,
     height: 60,
     borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 16,
   },
   logoText: {
@@ -201,22 +196,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   company: {
-    color: "#DFF7F1",
+    color: '#DFF7F1',
     fontSize: 12,
   },
   jobTitle: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   tagContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginTop: 8,
   },
   tag: {
-    backgroundColor: "#ffffff",
-    color: "#333",
+    backgroundColor: '#ffffff',
+    color: '#333',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
@@ -228,7 +223,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 16,
     marginBottom: 6,
   },
@@ -237,8 +232,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   bulletItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     marginBottom: 6,
   },
   bullet: {
@@ -252,37 +247,37 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   footer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     padding: 16,
-    borderTopColor: "#e0e0e0",
+    borderTopColor: '#e0e0e0',
     borderTopWidth: 1,
   },
   infoRowContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   infoBox: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
   infoText: {
     fontSize: 14,
   },
   button: {
-    backgroundColor: "#00B388",
+    backgroundColor: '#00B388',
     padding: 14,
     borderRadius: 12,
-    alignItems: "center",
+    alignItems: 'center',
   },
   buttonText: {
-    color: "white",
-    fontWeight: "600",
+    color: 'white',
+    fontWeight: '600',
     fontSize: 16,
   },
 });

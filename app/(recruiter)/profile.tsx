@@ -1,25 +1,18 @@
-import { useState } from "react";
-import {
-    Image,
-    Linking,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { useState } from 'react';
+import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function CompanyProfile() {
-  const [selectedTab, setSelectedTab] = useState("tentang");
+  const [selectedTab, setSelectedTab] = useState('tentang');
 
   const renderTabContent = () => {
     switch (selectedTab) {
-      case "tentang":
+      case 'tentang':
         return (
           <Card>
             <Text style={styles.cardTitle}>Tentang Perusahaan</Text>
             <Text style={styles.cardText}>
-              PT Telkom Indonesia adalah perusahaan terkemuka di bidang teknologi informasi dan komunikasi yang berkomitmen terhadap inklusi dan transformasi digital.
+              PT Telkom Indonesia adalah perusahaan terkemuka di bidang teknologi informasi dan
+              komunikasi yang berkomitmen terhadap inklusi dan transformasi digital.
             </Text>
             <Text style={styles.cardTitle}>Visi</Text>
             <Text style={styles.cardText}>
@@ -27,11 +20,12 @@ export default function CompanyProfile() {
             </Text>
             <Text style={styles.cardTitle}>Misi</Text>
             <Text style={styles.cardText}>
-              Memberdayakan masyarakat dengan teknologi yang inklusif, terjangkau, dan berkelanjutan.
+              Memberdayakan masyarakat dengan teknologi yang inklusif, terjangkau, dan
+              berkelanjutan.
             </Text>
           </Card>
         );
-      case "fasilitas":
+      case 'fasilitas':
         return (
           <Card>
             <Text style={styles.cardTitle}>Fasilitas Ramah Disabilitas</Text>
@@ -41,7 +35,7 @@ export default function CompanyProfile() {
             <Text style={styles.cardText}>✅ Pelatihan kerja inklusif</Text>
           </Card>
         );
-      case "penghargaan":
+      case 'penghargaan':
         return (
           <Card>
             <Text style={styles.cardTitle}>Penghargaan & Sertifikasi</Text>
@@ -50,22 +44,18 @@ export default function CompanyProfile() {
             <Text style={styles.cardText}>🌟 Mitra Ramah Disabilitas oleh UNDP</Text>
           </Card>
         );
-      case "galeri":
+      case 'galeri':
         return (
           <Card>
             <Text style={styles.cardTitle}>Galeri Perusahaan</Text>
             <View style={styles.galleryContainer}>
               {[
-                "https://via.placeholder.com/150/1",
-                "https://via.placeholder.com/150/2",
-                "https://via.placeholder.com/150/3",
-                "https://via.placeholder.com/150/4",
+                'https://via.placeholder.com/150/1',
+                'https://via.placeholder.com/150/2',
+                'https://via.placeholder.com/150/3',
+                'https://via.placeholder.com/150/4',
               ].map((url, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: url }}
-                  style={styles.galleryImage}
-                />
+                <Image key={index} source={{ uri: url }} style={styles.galleryImage} />
               ))}
             </View>
           </Card>
@@ -78,15 +68,16 @@ export default function CompanyProfile() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.headerCard}>
-        <Image
-          source={{ uri: "https://via.placeholder.com/100" }}
-          style={styles.companyLogo}
-        />
+        <Image source={{ uri: 'https://via.placeholder.com/100' }} style={styles.companyLogo} />
         <Text style={styles.companyName}>PT Telkom Indonesia</Text>
         <Text style={styles.companyIndustry}>Teknologi Informasi & Komunikasi</Text>
         <Text style={styles.location}>📍 Jakarta, Indonesia</Text>
-        <Text style={styles.link} onPress={() => Linking.openURL("https://www.telkom.co.id")}>🌐 www.telkom.co.id</Text>
-        <Text style={styles.link} onPress={() => Linking.openURL("mailto:hr@telkom.co.id")}>📧 hr@telkom.co.id</Text>
+        <Text style={styles.link} onPress={() => Linking.openURL('https://www.telkom.co.id')}>
+          🌐 www.telkom.co.id
+        </Text>
+        <Text style={styles.link} onPress={() => Linking.openURL('mailto:hr@telkom.co.id')}>
+          📧 hr@telkom.co.id
+        </Text>
 
         {/* Tombol hanya Edit Profil */}
         <View style={styles.actionRow}>
@@ -110,7 +101,7 @@ export default function CompanyProfile() {
 
       {/* Tab */}
       <View style={styles.tabContainer}>
-        {["tentang", "fasilitas", "penghargaan", "galeri"].map((tab) => (
+        {['tentang', 'fasilitas', 'penghargaan', 'galeri'].map((tab) => (
           <TabButton
             key={tab}
             label={tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -134,9 +125,7 @@ function TabButton({ label, value, selectedTab, onPress }) {
       style={[styles.tabButton, isSelected && styles.tabButtonActive]}
       onPress={() => onPress(value)}
     >
-      <Text style={[styles.tabButtonText, isSelected && styles.tabButtonTextActive]}>
-        {label}
-      </Text>
+      <Text style={[styles.tabButtonText, isSelected && styles.tabButtonTextActive]}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -147,12 +136,12 @@ function Card({ children }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f8fcff",
+    backgroundColor: '#f8fcff',
     padding: 16,
   },
   headerCard: {
-    alignItems: "center",
-    backgroundColor: "#d1f2eb",
+    alignItems: 'center',
+    backgroundColor: '#d1f2eb',
     padding: 20,
     borderRadius: 16,
     marginBottom: 16,
@@ -161,68 +150,68 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
     marginBottom: 10,
   },
   companyName: {
     fontSize: 22,
-    fontWeight: "bold",
-    color: "#004d40",
+    fontWeight: 'bold',
+    color: '#004d40',
   },
   companyIndustry: {
-    color: "#555",
+    color: '#555',
     fontSize: 14,
   },
   location: {
     fontSize: 13,
-    color: "#666",
+    color: '#666',
   },
   link: {
-    color: "#00796b",
-    textDecorationLine: "underline",
+    color: '#00796b',
+    textDecorationLine: 'underline',
     marginTop: 4,
   },
   actionRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 12,
     gap: 10,
   },
   actionButton: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 14,
-    borderColor: "#004d40",
+    borderColor: '#004d40',
     borderWidth: 1,
   },
   actionText: {
-    color: "#004d40",
-    fontWeight: "bold",
+    color: '#004d40',
+    fontWeight: 'bold',
   },
   statBox: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "#e0f2f1",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: '#e0f2f1',
     paddingVertical: 14,
     borderRadius: 12,
     marginBottom: 12,
   },
   statItem: {
-    alignItems: "center",
+    alignItems: 'center',
   },
   statNumber: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#00796b",
+    fontWeight: 'bold',
+    color: '#00796b',
   },
   statLabel: {
     fontSize: 13,
-    color: "#555",
+    color: '#555',
   },
   tabContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
     marginBottom: 12,
   },
   tabButton: {
@@ -230,25 +219,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     margin: 5,
   },
   tabButtonActive: {
-    backgroundColor: "#00796b",
-    borderColor: "#00796b",
+    backgroundColor: '#00796b',
+    borderColor: '#00796b',
   },
   tabButtonText: {
     fontSize: 13,
-    color: "#333",
+    color: '#333',
   },
   tabButtonTextActive: {
-    color: "white",
+    color: 'white',
   },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -256,28 +245,28 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   cardTitle: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 16,
     marginBottom: 6,
-    color: "#004d40",
+    color: '#004d40',
   },
   cardText: {
     fontSize: 14,
     lineHeight: 20,
-    color: "#444",
+    color: '#444',
     marginBottom: 4,
   },
   galleryContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
-    justifyContent: "center",
+    justifyContent: 'center',
     marginTop: 10,
   },
   galleryImage: {
     width: 100,
     height: 100,
     borderRadius: 10,
-    backgroundColor: "#ddd",
+    backgroundColor: '#ddd',
   },
 });
